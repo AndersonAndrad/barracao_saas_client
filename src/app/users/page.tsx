@@ -41,8 +41,7 @@ export default function Page() {
         <PageTemplateComponent title='Macumbeirinhos(as)'>
             <div className="flex flex-col gap-3">
                 <header className="flex justify-end">
-                    <NewUserComponent dispatch={() => {
-                    }}/>
+                    <NewUserComponent dispatch={async () => await initUsers()}/>
                 </header>
                 <main>
                     <Table>

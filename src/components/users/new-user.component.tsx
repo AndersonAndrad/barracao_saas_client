@@ -2,6 +2,7 @@
 
 import {
     Sheet,
+    SheetClose,
     SheetContent,
     SheetDescription,
     SheetFooter,
@@ -139,11 +140,13 @@ export function NewUserComponent({dispatch}: NewUserComponentProps) {
                     {/* password */}
                     <label className='flex flex-col gap-2'>
                         <span className='cursor-pointer'>Senha temporária</span>
-                        <Input onChange={(e) => setPassword(e.target.value)} value={password}/>
+                        <Input onChange={(event) => setPassword(event.target.value)} value={password}/>
                     </label>
                 </div>
                 <SheetFooter className="pt-2">
-                    <Button onClick={async () => await submit()}>Salvar <Check/></Button>
+                    <SheetClose asChild>
+                        <Button onClick={async () => await submit()}>Salvar <Check/></Button>
+                    </SheetClose>
                 </SheetFooter>
             </SheetContent>
         </Sheet>
