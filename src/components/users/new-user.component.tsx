@@ -10,7 +10,7 @@ import {
     SheetTitle,
     SheetTrigger
 } from "@/components/ui/sheet";
-import {Check, Plus} from "lucide-react";
+import {Check, Plus, X} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {useState} from "react";
@@ -76,14 +76,14 @@ export function NewUserComponent({dispatch}: NewUserComponentProps) {
             <SheetTrigger>
                 <Button>Novo macumbeirinho(a)<Plus/></Button>
             </SheetTrigger>
-            <SheetContent>
+            <SheetContent className='flex flex-col gap-3'>
                 <SheetHeader>
                     <SheetTitle>Um novo macumbeirinho(a) 🥰</SheetTitle>
                     <SheetDescription>
                         Aqui vão ser inseridos as informações básicas para registrar um(a) novo(a) macumbeirinho(a)
                     </SheetDescription>
                 </SheetHeader>
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3 flex-grow">
                     {/* Name */}
                     <label className='flex flex-col gap-2'>
                         <span className='cursor-pointer'>Nome</span>
@@ -144,6 +144,12 @@ export function NewUserComponent({dispatch}: NewUserComponentProps) {
                     </label>
                 </div>
                 <SheetFooter className="pt-2">
+                    {/* Close without save anything */}
+                    <SheetClose asChild>
+                        <Button variant='ghost'>Cancelar <X/> </Button>
+                    </SheetClose>
+
+                    {/* Close after send user information to server */}
                     <SheetClose asChild>
                         <Button onClick={async () => await submit()}>Salvar <Check/></Button>
                     </SheetClose>
