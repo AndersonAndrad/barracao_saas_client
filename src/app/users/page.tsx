@@ -49,20 +49,26 @@ export default function Page() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Nome</TableHead>
+                                <TableHead>Apelido</TableHead>
                                 <TableHead>Email</TableHead>
                                 <TableHead>Telefone</TableHead>
                                 <TableHead>Aniversário</TableHead>
                                 <TableHead>Status</TableHead>
+                                <TableHead></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {users.map((user) => (
                                 <TableRow key={user._id}>
                                     <TableCell>{user.name}</TableCell>
+                                    <TableCell>{user?.alias ?? '-'}</TableCell>
                                     <TableCell>{user.email}</TableCell>
                                     <TableCell>{user?.phone ?? '-'}</TableCell>
                                     <TableCell>{formatDate(user?.birthday)}</TableCell>
                                     <TableCell>{getUserStatus(user?.status)}</TableCell>
+                                    <TableCell>
+                                        <NewUserComponent userToUpdate={user} dispatch={async () => await initUsers()}/>
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

@@ -10,7 +10,7 @@ import {
     SheetTitle,
     SheetTrigger
 } from "@/components/ui/sheet";
-import {Check, Plus, X} from "lucide-react";
+import {Check, Pencil, Plus, X} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {useState} from "react";
@@ -23,20 +23,21 @@ import {SelectOption} from "@/core/interfaces/common.interface";
 
 interface NewUserComponentProps {
     dispatch: () => void;
+    userToUpdate?: User;
 }
 
-export function NewUserComponent({dispatch}: NewUserComponentProps) {
+export function NewUserComponent({dispatch, userToUpdate}: NewUserComponentProps) {
     const [updating, setUpdating] = useState(false);
 
     const userApi = new UserApi();
 
     // User data
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [alias, setAlias] = useState("");
-    const [phone, setPhone] = useState("");
-    const [birthday, setBirthday] = useState<Date>(new Date());
-    const [status, setStatus] = useState<string>();
+    const [name, setName] = useState(userToUpdate?.name ?? '');
+    const [email, setEmail] = useState(userToUpdate?.email ?? '');
+    const [alias, setAlias] = useState(userToUpdate?.alias ?? '');
+    const [phone, setPhone] = useState(userToUpdate?.phone ?? '');
+    const [birthday, setBirthday] = useState<Date>(userToUpdate?.birthday ?? new Date());
+    const [status, setStatus] = useState<string>(userToUpdate?.status ?? '');
     const [password, setPassword] = useState(generateHash().slice(0, 8));
 
     const submit = async (): Promise<void> => {
@@ -51,10 +52,17 @@ export function NewUserComponent({dispatch}: NewUserComponentProps) {
             status,
         } as Omit<User, '_id'>;
 
-        await userApi.create(user).then(() => {
-            clearStates();
-            dispatch();
-        });
+        if (userToUpdate) {
+            await userApi.updateOne(userToUpdate._id, user).then(() => {
+                clearStates();
+                dispatch();
+            });
+        } else {
+            await userApi.create(user).then(() => {
+                clearStates();
+                dispatch();
+            });
+        }
     }
 
     const userStatus: SelectOption[] = [
@@ -74,13 +82,22 @@ export function NewUserComponent({dispatch}: NewUserComponentProps) {
     return (
         <Sheet>
             <SheetTrigger>
-                <Button>Novo macumbeirinho(a)<Plus/></Button>
+                {/* when are creating a new user*/}
+                {!userToUpdate && <Button>Novo macumbeirinho(a)<Plus/></Button>}
+
+                {/* When are updating user */}
+                {userToUpdate && <Button><Pencil/></Button>}
             </SheetTrigger>
             <SheetContent className='flex flex-col gap-3'>
                 <SheetHeader>
-                    <SheetTitle>Um novo macumbeirinho(a) 🥰</SheetTitle>
+                    {/* when are creating a new user*/}
+                    {!userToUpdate && <SheetTitle>Um novo macumbeirinho(a) 🥰</SheetTitle>}
+
+                    {/* when are updating the user */}
+                    {userToUpdate && <SheetTitle>Atualizando um macumbeirinho(a) 🫡</SheetTitle>}
                     <SheetDescription>
-                        Aqui vão ser inseridos as informações básicas para registrar um(a) novo(a) macumbeirinho(a)
+                        Aqui vão ser inseridos as informações básicas para registrar/atualizar um(a) novo(a)
+                        macumbeirinho(a)
                     </SheetDescription>
                 </SheetHeader>
                 <div className="flex flex-col gap-3 flex-grow">
@@ -115,7 +132,7 @@ export function NewUserComponent({dispatch}: NewUserComponentProps) {
                     </label>
 
                     {/* Status - @warn: only when are updating */}
-                    {updating &&
+                    {userToUpdate &&
                         <label className='flex flex-col gap-2'>
                             <span className='cursor-pointer'>Status</span>
                             <Select onValueChange={(userStatus) => {
@@ -138,10 +155,12 @@ export function NewUserComponent({dispatch}: NewUserComponentProps) {
                     }
 
                     {/* password */}
-                    <label className='flex flex-col gap-2'>
-                        <span className='cursor-pointer'>Senha temporária</span>
-                        <Input onChange={(event) => setPassword(event.target.value)} value={password}/>
-                    </label>
+                    {!userToUpdate && (
+                        <label className='flex flex-col gap-2'>
+                            <span className='cursor-pointer'>Senha temporária</span>
+                            <Input onChange={(event) => setPassword(event.target.value)} value={password}/>
+                        </label>
+                    )}
                 </div>
                 <SheetFooter className="pt-2">
                     {/* Close without save anything */}
@@ -149,10 +168,19 @@ export function NewUserComponent({dispatch}: NewUserComponentProps) {
                         <Button variant='ghost'>Cancelar <X/> </Button>
                     </SheetClose>
 
-                    {/* Close after send user information to server */}
-                    <SheetClose asChild>
-                        <Button onClick={async () => await submit()}>Salvar <Check/></Button>
-                    </SheetClose>
+                    {/* if not exists user ?? Close after send user information to server */}
+                    {!userToUpdate && (
+                        <SheetClose asChild>
+                            <Button onClick={async () => await submit()}>Salvar <Check/></Button>
+                        </SheetClose>
+                    )}
+
+                    {/* if exists user ?? Close after send user information to server */}
+                    {userToUpdate && (
+                        <SheetClose asChild>
+                            <Button onClick={async () => await submit()}>Atualizar <Pencil/></Button>
+                        </SheetClose>
+                    )}
                 </SheetFooter>
             </SheetContent>
         </Sheet>
