@@ -1,10 +1,10 @@
 import {BaseApi} from "@/apis/base.api";
-import {User} from "@/core/interfaces/user.interface";
+import {FilterUser, User} from "@/core/interfaces/user.interface";
+import {PaginationResponse} from "@/core/interfaces/pagination.interface";
 
 export class UserApi extends BaseApi<User> {
     constructor() {
         super();
-
         this.baseUrl = 'user';
 
         this.createSuccessMessage = 'Macumbeirinho(a) registrado com sucesso';
@@ -15,7 +15,9 @@ export class UserApi extends BaseApi<User> {
 
         this.deleteSuccessMessage = 'Macumbeirinho(a) deletado com sucesso';
         this.deleteFailureMessage = 'Houve um erro ao tentar apagar o(a) macumbeirinho(a)';
+    }
 
-        console.log('called')
+    async find(filter: FilterUser): Promise<PaginationResponse<User>> {
+        return super.find(filter);
     }
 }

@@ -24,9 +24,11 @@ import {SelectOption} from "@/core/interfaces/common.interface";
 interface NewUserComponentProps {
     dispatch: () => void;
     userToUpdate?: User;
+    label: string;
 }
 
-export function NewUserComponent({dispatch, userToUpdate}: NewUserComponentProps) {
+export function NewUserComponent(props: NewUserComponentProps) {
+    const {dispatch, userToUpdate, label = 'Novo'} = props;
     const [updating, setUpdating] = useState(false);
 
     const userApi = new UserApi();
@@ -58,6 +60,7 @@ export function NewUserComponent({dispatch, userToUpdate}: NewUserComponentProps
                 dispatch();
             });
         } else {
+            delete (user as any).status;
             await userApi.create(user).then(() => {
                 clearStates();
                 dispatch();
@@ -83,7 +86,7 @@ export function NewUserComponent({dispatch, userToUpdate}: NewUserComponentProps
         <Sheet>
             <SheetTrigger>
                 {/* when are creating a new user*/}
-                {!userToUpdate && <Button>Novo macumbeirinho(a)<Plus/></Button>}
+                {!userToUpdate && <Button><Plus/>{label}</Button>}
 
                 {/* When are updating user */}
                 {userToUpdate && <Button><Pencil/></Button>}

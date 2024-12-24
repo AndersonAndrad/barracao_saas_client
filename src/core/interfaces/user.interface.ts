@@ -1,3 +1,5 @@
+import {PaginationRequest} from "@/core/interfaces/pagination.interface";
+
 export interface User {
     _id: string;
     name: string;
@@ -14,4 +16,8 @@ export enum UserStatus {
     ENABLE = 'enabled',
     DISABLED = 'disabled',
     AWAY = 'away',
+}
+
+export interface FilterUser extends PaginationRequest {
+    word?: string;
 }
