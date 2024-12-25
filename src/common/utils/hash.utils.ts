@@ -8,3 +8,7 @@ export const generateHash = (): string => {
 
     return randomString;
 };
+
+export const generateSmallHash = (size: number = 8): string => {
+    return generateHash().slice(0, size);
+}

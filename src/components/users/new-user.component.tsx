@@ -1,25 +1,23 @@
 'use client';
 
-import {
-    Sheet,
-    SheetClose,
-    SheetContent,
-    SheetDescription,
-    SheetFooter,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger
-} from "@/components/ui/sheet";
-import {Check, Pencil, Plus, X} from "lucide-react";
+import {Check, Plus, X} from "lucide-react";
 import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
 import {useState} from "react";
-import {DatePicker} from "@/components/ui/date-picker";
-import {generateHash} from "@/common/utils/hash.utils";
+import {generateHash, generateSmallHash} from "@/common/utils/hash.utils";
 import {User, UserStatus} from "@/core/interfaces/user.interface";
 import {UserApi} from "@/apis/user.api";
-import {Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {SelectOption} from "@/core/interfaces/common.interface";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from "@/components/ui/dialog";
+import {Input} from "@/components/ui/input";
+import {ColorObj, SelectColorsComponent} from "@/components/users/select-colors.component";
 
 interface NewUserComponentProps {
     dispatch: () => void;
@@ -82,110 +80,84 @@ export function NewUserComponent(props: NewUserComponentProps) {
         setStatus('');
     }
 
+    const colors: ColorObj[] = Array.from({length: 9}, (_, index) => {
+        const randomColor = Math.floor(Math.random() * 16777215).toString(16);
+        const hex: string = `#${randomColor.padStart(6, '0')}`;
+
+        return {
+            id: generateSmallHash(),
+            hex,
+            selected: index === 0,
+        }
+    });
+
     return (
-        <Sheet>
-            <SheetTrigger>
-                {/* when are creating a new user*/}
-                {!userToUpdate && <Button><Plus/>{label}</Button>}
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button><Plus/>{label}</Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle className="font-bold">Cadastro</DialogTitle>
+                    <DialogDescription>Cadastro de usuário para acesso a plataforma.</DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col gap-3">
+                    {/* Full name */}
+                    <div className="flex flex-col gap-1">
+                        <label htmlFor="fullName">Nome completo</label>
+                        <Input id="fullName"/>
+                    </div>
 
-                {/* When are updating user */}
-                {userToUpdate && <Button><Pencil/></Button>}
-            </SheetTrigger>
-            <SheetContent className='flex flex-col gap-3'>
-                <SheetHeader>
-                    {/* when are creating a new user*/}
-                    {!userToUpdate && <SheetTitle>Um novo macumbeirinho(a) 🥰</SheetTitle>}
+                    <div className="flex gap-3">
+                        {/* alias */}
+                        <div className="flex w-full flex-col gap-1">
+                            <label htmlFor="alias">Apelido</label>
+                            <Input id="alias"/>
+                        </div>
 
-                    {/* when are updating the user */}
-                    {userToUpdate && <SheetTitle>Atualizando um macumbeirinho(a) 🫡</SheetTitle>}
-                    <SheetDescription>
-                        Aqui vão ser inseridos as informações básicas para registrar/atualizar um(a) novo(a)
-                        macumbeirinho(a)
-                    </SheetDescription>
-                </SheetHeader>
-                <div className="flex flex-col gap-3 flex-grow">
-                    {/* Name */}
-                    <label className='flex flex-col gap-2'>
-                        <span className='cursor-pointer'>Nome</span>
-                        <Input onChange={(event) => setName(event.target.value)} value={name}/>
-                    </label>
+                        {/* phone */}
+                        <div className="flex w-full flex-col gap-1">
+                            <label htmlFor="phone">Telefone</label>
+                            <Input id="phone"/>
+                        </div>
+                    </div>
 
-                    {/* Alias */}
-                    <label className='flex flex-col gap-2'>
-                        <span className='cursor-pointer'>Apelido</span>
-                        <Input onChange={(event) => setAlias(event.target.value)} value={alias}/>
-                    </label>
+                    {/* email */}
+                    <div className="flex flex-col gap-1">
+                        <label htmlFor="email">Email</label>
+                        <Input id="email"/>
+                    </div>
 
-                    {/* Birthday */}
-                    <label className='flex flex-col gap-2'>
-                        <span className='cursor-pointer'>Aniversário</span>
-                        <DatePicker onSelect={(date) => setBirthday(date)}/>
-                    </label>
+                    <div className="flex gap-3">
+                        {/* birthday */}
+                        <div className="flex w-full flex-col gap-1">
+                            <label htmlFor="birthday">Aniversário</label>
+                            <Input id="birthday"/>
+                        </div>
 
-                    {/* phone */}
-                    <label className='flex flex-col gap-2'>
-                        <span className='cursor-pointer'>Telefone</span>
-                        <Input onChange={(event) => setPhone(event.target.value)} value={phone}/>
-                    </label>
+                        {/* temporary password */}
+                        <div className="flex w-full flex-col gap-1">
+                            <label htmlFor="temporaryPassword">Senha temporária</label>
+                            <Input id="temporaryPassword"/>
+                        </div>
+                    </div>
 
-                    {/* Email */}
-                    <label className='flex flex-col gap-2'>
-                        <span className='cursor-pointer'>Email</span>
-                        <Input onChange={(event) => setEmail(event.target.value)} value={email}/>
-                    </label>
-
-                    {/* Status - @warn: only when are updating */}
-                    {userToUpdate &&
-                        <label className='flex flex-col gap-2'>
-                            <span className='cursor-pointer'>Status</span>
-                            <Select onValueChange={(userStatus) => {
-                                setStatus(userStatus)
-                            }}>
-                                <SelectTrigger>
-                                    <SelectValue></SelectValue>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        {userStatus.map(userStatus => (
-                                            <SelectItem key={userStatus.id} value={userStatus.id}>
-                                                {userStatus.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-                        </label>
-                    }
-
-                    {/* password */}
-                    {!userToUpdate && (
-                        <label className='flex flex-col gap-2'>
-                            <span className='cursor-pointer'>Senha temporária</span>
-                            <Input onChange={(event) => setPassword(event.target.value)} value={password}/>
-                        </label>
-                    )}
+                    {/* color */}
+                    <div className="flex flex-col w-full gap-1">
+                        <label htmlFor="temporaryPassword">Qual a cor do seu Orixá?</label>
+                        <SelectColorsComponent
+                            colors={colors}
+                            onSelectColor={(color) => {
+                                console.log({color})
+                            }}
+                        />
+                    </div>
                 </div>
-                <SheetFooter className="pt-2">
-                    {/* Close without save anything */}
-                    <SheetClose asChild>
-                        <Button variant='ghost'>Cancelar <X/> </Button>
-                    </SheetClose>
-
-                    {/* if not exists user ?? Close after send user information to server */}
-                    {!userToUpdate && (
-                        <SheetClose asChild>
-                            <Button onClick={async () => await submit()}>Salvar <Check/></Button>
-                        </SheetClose>
-                    )}
-
-                    {/* if exists user ?? Close after send user information to server */}
-                    {userToUpdate && (
-                        <SheetClose asChild>
-                            <Button onClick={async () => await submit()}>Atualizar <Pencil/></Button>
-                        </SheetClose>
-                    )}
-                </SheetFooter>
-            </SheetContent>
-        </Sheet>
+                <DialogFooter>
+                    <Button variant="ghost">Cancelar <X/></Button>
+                    <Button>Salvar <Check/></Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     )
 }
