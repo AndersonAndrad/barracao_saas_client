@@ -5,15 +5,16 @@ import {cn} from "@/lib/utils";
 import {CalendarIcon} from "lucide-react";
 import {useState} from "react";
 import {Button} from "../ui/button";
-import {Calendar} from "../ui/calendar";
+import {Calendar} from "@/components/ui/calendar";
 
 interface DatePickerCommonProps {
     label?: string;
     onSelect: (date: Date) => void;
+    selected: Date | undefined;
 }
 
 export function DatePicker(props: DatePickerCommonProps) {
-    const {label, onSelect} = props;
+    const {label, onSelect, selected} = props;
     const [date, setDate] = useState<Date>(new Date());
 
     const emitDate = (selectedDate: any): void => {
@@ -38,7 +39,7 @@ export function DatePicker(props: DatePickerCommonProps) {
             <PopoverContent>
                 <Calendar
                     mode="single"
-                    selected={date}
+                    selected={selected}
                     onSelect={emitDate}
                     initialFocus
                 />

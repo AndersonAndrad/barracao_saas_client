@@ -1,15 +1,16 @@
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FilterUser, User, UserStatus } from "@/core/interfaces/user.interface";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useEffect, useState } from "react";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import {FilterUser, User, UserStatus} from "@/core/interfaces/user.interface";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
+import {useEffect, useState} from "react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { NewUserComponent } from "@/components/users/new-user.component";
-import { PageTemplateComponent } from "@/components/common/page-template.component";
-import { UserApi } from "@/apis/user.api";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {NewUserComponent} from "@/components/users/new-user.component";
+import {PageTemplateComponent} from "@/components/common/page-template.component";
+import {UserApi} from "@/apis/user.api";
+import {getInitials} from "@/common/utils/str.utils";
 
 export default function Page() {
     const userApi = new UserApi();
@@ -21,7 +22,7 @@ export default function Page() {
     const [existsData, setExistsData] = useState<boolean>(false);
 
     const initUsers = async (filter?: FilterUser): Promise<void> => {
-        const { items, total } = await userApi.find({ ...filter, page: 1, size: 10 }).catch(() => ({ items: [], total: 0 }));
+        const {items, total} = await userApi.find({...filter, page: 1, size: 10}).catch(() => ({items: [], total: 0}));
 
         setExistsData(!!total);
 
@@ -45,13 +46,6 @@ export default function Page() {
         }
     }
 
-    const getInitials = (fullName: string): string => {
-        return fullName
-            .split(' ')
-            .map(word => word.charAt(0).toUpperCase())
-            .join('');
-    }
-
     useEffect(() => {
         initUsers();
     }, []);
@@ -68,7 +62,7 @@ export default function Page() {
                             value={searchWord}
                         />
                     </div>
-                    <NewUserComponent label='Novo' dispatch={async () => await initUsers()} />
+                    <NewUserComponent label='Novo' dispatch={async () => await initUsers()}/>
                 </header>
                 <main className="flex flex-grow h-full">
                     {/* When not exists any data */}
@@ -89,7 +83,7 @@ export default function Page() {
                             <span>Usuario não encontrado</span>
                             <span className="text-center">
                                 {`Você pesquisou por "${searchWord}" mas não foi encontrado nenhum registro. Você pode fazer uma nova`}
-                                <br />
+                                <br/>
                                 {` pesquisa ou cadastrar um novo usuário.`}
                             </span>
                             <div className="flex gap-3">
@@ -120,7 +114,7 @@ export default function Page() {
                                     <TableRow key={user._id}>
                                         <TableCell className='flex gap-3 items-center'>
                                             <Avatar>
-                                                <AvatarImage src='https://github.com/shadcn.png' />
+                                                <AvatarImage src='https://github.com/shadcn.png'/>
                                                 <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                                             </Avatar>
                                             <div className='flex flex-col gap-1'>
@@ -132,8 +126,7 @@ export default function Page() {
                                         <TableCell>{user?.phone ?? '-'}</TableCell>
                                         <TableCell>{getUserStatus(user?.status)}</TableCell>
                                         <TableCell>
-                                            <NewUserComponent userToUpdate={user}
-                                                dispatch={async () => await initUsers()} />
+                                            
                                         </TableCell>
                                     </TableRow>
                                 ))}

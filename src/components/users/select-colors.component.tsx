@@ -34,7 +34,7 @@ export function SelectColorsComponent({colors = [], onSelectColor}: SelectColors
         const colors: ColorObj[] = localColors.map(color => ({...color, selected: color.id === colorId}));
 
         colors.forEach(color => {
-            if (color.selected) onSelectColor(color.hex)
+            if (color.selected) onSelectColor(color.hex);
         })
 
         setLocalColors(insertNullColor(colors));

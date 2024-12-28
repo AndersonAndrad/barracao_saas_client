@@ -9,6 +9,8 @@ export interface User {
     birthday: Date;
     password: string;
     status: UserStatus;
+    color: string;
+    avatar: string;
 }
 
 export enum UserStatus {

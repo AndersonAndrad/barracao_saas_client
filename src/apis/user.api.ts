@@ -1,6 +1,8 @@
 import {BaseApi} from "@/apis/base.api";
 import {FilterUser, User} from "@/core/interfaces/user.interface";
 import {PaginationResponse} from "@/core/interfaces/pagination.interface";
+import {util} from "zod";
+import Omit = util.Omit;
 
 export class UserApi extends BaseApi<User> {
     constructor() {
@@ -19,5 +21,9 @@ export class UserApi extends BaseApi<User> {
 
     async find(filter: FilterUser): Promise<PaginationResponse<User>> {
         return super.find(filter);
+    }
+
+    async create(entity: Omit<User, "_id" | "status">): Promise<void> {
+        return super.create(entity as any);
     }
 }
