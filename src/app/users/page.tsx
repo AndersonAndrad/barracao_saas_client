@@ -22,14 +22,28 @@ export default function Page() {
     const [existsData, setExistsData] = useState<boolean>(false);
 
     const initUsers = async (filter?: FilterUser): Promise<void> => {
-        const {items, total} = await userApi.find({...filter, page: 1, size: 10}).catch(() => ({items: [], total: 0}));
+        const {items, total} = await userApi
+            .find({...filter, page: 1, size: 10})
+            .catch(() => ({items: [], total: 0}));
 
         setExistsData(!!total);
 
-        setCacheUsers(items);
+        const processedUsers = items.map((user) => {
+            if (user.avatar) {
+                try {
+                    const avatarData = JSON.parse(user.avatar);
+                    return {...user, avatar: avatarData.image};
+                } catch {
+                    return user;
+                }
+            }
+            return user;
+        });
 
-        setUsers(items);
-    }
+        setCacheUsers(processedUsers);
+        setUsers(processedUsers);
+    };
+
 
     const getUserStatus = (userStatus: UserStatus): string => {
         switch (userStatus) {
@@ -114,7 +128,7 @@ export default function Page() {
                                     <TableRow key={user._id}>
                                         <TableCell className='flex gap-3 items-center'>
                                             <Avatar>
-                                                <AvatarImage src='https://github.com/shadcn.png'/>
+                                                <AvatarImage src={user.avatar}/>
                                                 <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                                             </Avatar>
                                             <div className='flex flex-col gap-1'>
@@ -126,7 +140,7 @@ export default function Page() {
                                         <TableCell>{user?.phone ?? '-'}</TableCell>
                                         <TableCell>{getUserStatus(user?.status)}</TableCell>
                                         <TableCell>
-                                            
+
                                         </TableCell>
                                     </TableRow>
                                 ))}

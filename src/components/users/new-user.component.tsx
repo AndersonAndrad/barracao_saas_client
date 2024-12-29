@@ -26,33 +26,29 @@ import {readFile} from "@/common/utils/file.utils";
 
 interface NewUserComponentProps {
     dispatch: () => void;
-    userToUpdate?: User;
     label: string;
 }
 
 export function NewUserComponent(props: NewUserComponentProps) {
-    const {dispatch, userToUpdate, label = 'Novo'} = props;
+    const {dispatch, label = 'Novo'} = props;
     const userApi = new UserApi();
 
     // User data
-    const [name, setName] = useState(userToUpdate?.name ?? '');
-    const [email, setEmail] = useState(userToUpdate?.email ?? '');
-    const [alias, setAlias] = useState(userToUpdate?.alias ?? '');
-    const [phone, setPhone] = useState(userToUpdate?.phone ?? '');
-    const [birthday, setBirthday] = useState<Date>(userToUpdate?.birthday ?? new Date());
-    const [status, setStatus] = useState<string>(userToUpdate?.status ?? '');
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [alias, setAlias] = useState('');
+    const [phone, setPhone] = useState('');
+    const [birthday, setBirthday] = useState<Date>(new Date());
     const [password, setPassword] = useState(generateSmallHash());
     const [color, setColor] = useState<string>('');
 
     // File state
     const [file, setFile] = useState<any>(null);
     const [preview, setPreview] = useState<any>('');
-    const [avatar, setAvatar] = useState('');
 
     const submit = async (): Promise<void> => {
-        await readFile(file).then((result) => {
-            setAvatar(JSON.stringify({image: result}))
-        });
+        const result = await readFile(file);
+
 
         const user: Omit<User, '_id' | 'status'> = {
             name,
@@ -63,7 +59,7 @@ export function NewUserComponent(props: NewUserComponentProps) {
             password,
             confirmPassword: password,
             color,
-            avatar,
+            avatar: JSON.stringify({image: result})
         } as Omit<User, '_id' | 'status'>;
 
         await userApi.create(user).then(() => {
@@ -78,19 +74,19 @@ export function NewUserComponent(props: NewUserComponentProps) {
         setAlias("");
         setPhone("");
         setPassword("");
-        setStatus('');
     }
 
-    const colors: ColorObj[] = Array.from({length: 9}, (_, index) => {
-        const randomColor = Math.floor(Math.random() * 16777215).toString(16);
-        const hex: string = `#${randomColor.padStart(6, '0')}`;
-
-        return {
-            id: generateSmallHash(),
-            hex,
-            selected: index === 0,
-        }
-    });
+    const colors: ColorObj[] = [
+        {id: generateSmallHash(), hex: '#E2E7EE', selected: false},
+        {id: generateSmallHash(), hex: '#92CEF7', selected: false},
+        {id: generateSmallHash(), hex: '#BEB8FA', selected: false},
+        {id: generateSmallHash(), hex: '#98DD98', selected: false},
+        {id: generateSmallHash(), hex: '#ECDC83', selected: false},
+        {id: generateSmallHash(), hex: '#C84A4A', selected: false},
+        {id: generateSmallHash(), hex: '#A00A0A', selected: false},
+        {id: generateSmallHash(), hex: '#73A8CC', selected: false},
+        {id: generateSmallHash(), hex: '#878C93', selected: false},
+    ];
 
     return (
         <Dialog>
