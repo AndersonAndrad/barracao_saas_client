@@ -1,6 +1,6 @@
 import {Button} from "@/components/ui/button";
 import {Upload} from "lucide-react";
-import {useState} from "react";
+import {fileSizeInvalid} from "@/common/utils/file.utils";
 
 interface UploadImageProps {
     onPreview: any;
@@ -10,24 +10,18 @@ interface UploadImageProps {
 
 export function UploadImage(props: UploadImageProps) {
     const {onPreview, onUpload, label} = props;
-    const [file, setFile] = useState<any>(null);
-    const [preview, setPreview] = useState<any>('');
-    const [avatar, setAvatar] = useState('');
-
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!event.target.files || !event.target.files.length) return;
 
+
         const [selectedFile] = event.target.files
 
-        setFile(selectedFile);
+        if (fileSizeInvalid(selectedFile)) return;
 
         const reader = new FileReader();
         reader.onloadend = () => {
-            const result = reader.result as string;
-
-            setPreview(result);
-            onPreview(result);
+            onPreview(reader.result as string);
         };
 
         reader.readAsDataURL(selectedFile);

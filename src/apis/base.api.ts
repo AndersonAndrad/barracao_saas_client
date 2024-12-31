@@ -1,9 +1,9 @@
-import { PaginationRequest, PaginationResponse } from "@/core/interfaces/pagination.interface";
-import axios, { AxiosInstance } from "axios";
+import {PaginationRequest, PaginationResponse} from "@/core/interfaces/pagination.interface";
+import axios, {AxiosInstance} from "axios";
 
-import { buildParamsFromObject } from "@/common/utils/request.util";
-import { formatObj } from "@/common/utils/obj.utils";
-import { toast } from "sonner";
+import {buildParamsFromObject} from "@/common/utils/request.util";
+import {formatObj} from "@/common/utils/obj.utils";
+import {toast} from "sonner";
 
 export class BaseApi<T> {
     baseUrl: string = '';
@@ -35,8 +35,8 @@ export class BaseApi<T> {
                     toast(this.createSuccessMessage);
                     resolve();
                 })
-                .catch(({ error }) => {
-                    toast(this.createFailureMessage, { description: error.message });
+                .catch((error) => {
+                    toast(this.createFailureMessage, {description: error.message});
                     reject(error);
                 });
         });
@@ -51,7 +51,7 @@ export class BaseApi<T> {
                     resolve();
                 })
                 .catch((error) => {
-                    toast(this.updateFailureMessage, { description: error.message });
+                    toast(this.updateFailureMessage, {description: error.message});
                     reject(error);
                 });
         });
@@ -66,7 +66,7 @@ export class BaseApi<T> {
                     resolve();
                 })
                 .catch((error) => {
-                    toast(this.deleteFailureMessage, { description: error.message });
+                    toast(this.deleteFailureMessage, {description: error.message});
                     reject(error);
                 });
         });
@@ -76,11 +76,11 @@ export class BaseApi<T> {
         return new Promise((resolve, reject) => {
             this.serverApi
                 .get(`${this.baseUrl}${buildParamsFromObject(filter)}`)
-                .then(({ data }) => {
+                .then(({data}) => {
                     resolve(data as PaginationResponse<T>);
                 })
                 .catch((error) => {
-                    toast(this.findFailureMessage, { description: error.message });
+                    toast(this.findFailureMessage, {description: error.message});
                     reject(error);
                 });
         });
