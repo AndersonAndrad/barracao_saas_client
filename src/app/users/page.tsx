@@ -11,20 +11,26 @@ import {NewUserComponent} from "@/components/users/new-user.component";
 import {PageTemplateComponent} from "@/components/common/page-template.component";
 import {UserApi} from "@/apis/user.api";
 import {getInitials} from "@/common/utils/str.utils";
+import {debounce} from "next/dist/server/utils";
 
 export default function Page() {
     const userApi = new UserApi();
 
     const [users, setUsers] = useState<User[]>([]);
-    const [cacheUsers, setCacheUsers] = useState<User[]>([]);
 
     const [searchWord, setSearchWord] = useState<string>("");
     const [existsData, setExistsData] = useState<boolean>(false);
+    const [previousFilter, setPreviousFilter] = useState<FilterUser>({page: 1, size: 10});
 
     const initUsers = async (filter?: FilterUser): Promise<void> => {
+        const finalFilter = {page: 1, ...filter, size: 10}
+
         const {items, total} = await userApi
-            .find({...filter, page: 1, size: 10})
-            .catch(() => ({items: [], total: 0}));
+            .find(finalFilter)
+            .catch(() => ({items: [], total: 0}))
+            .finally(() => {
+                setPreviousFilter(finalFilter)
+            })
 
         setExistsData(!!total);
 
@@ -40,10 +46,25 @@ export default function Page() {
             return user;
         });
 
-        setCacheUsers(processedUsers);
         setUsers(processedUsers);
     };
 
+    const searchUserByWord = async (word: string): Promise<void> => {
+        if (!word || !word.trim().length) {
+            const {word, ...rest} = previousFilter;
+            await initUsers(rest);
+            return;
+        }
+
+        word = word.trim().replace(/\s+/g, ' ');
+
+        const method = debounce(async (word: string) => {
+            await initUsers({...previousFilter, word});
+        }, 750)
+
+        method(word);
+        setSearchWord(word);
+    }
 
     const getUserStatus = (userStatus: UserStatus): string => {
         switch (userStatus) {
@@ -64,6 +85,14 @@ export default function Page() {
         initUsers();
     }, []);
 
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            searchUserByWord(searchWord);
+        }, 750);
+
+        return () => clearTimeout(handler); // Clear timeout on each change
+    }, [searchWord]);
+
     return (
         <PageTemplateComponent title='Usuários'>
             <div className="flex flex-col gap-3 h-full">
@@ -71,8 +100,7 @@ export default function Page() {
                     <div>
                         <Input
                             placeholder='Nome ou Apelido'
-                            onChange={(event) => {
-                            }}
+                            onChange={(event) => setSearchWord(event.target.value)}
                             value={searchWord}
                         />
                     </div>
