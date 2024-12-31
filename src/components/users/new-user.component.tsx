@@ -189,7 +189,9 @@ export function NewUserComponent(props: NewUserComponentProps) {
                     <DialogClose asChild>
                         <Button variant="ghost">Cancelar <X/></Button>
                     </DialogClose>
-                    <Button onClick={async () => await submit()}>Salvar <Check/></Button>
+                    <DialogClose asChild>
+                        <Button onClick={async () => await submit()}>Salvar <Check/></Button>
+                    </DialogClose>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
