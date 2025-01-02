@@ -109,7 +109,7 @@ export default function Page() {
                     </div>
                     <NewUserComponent label='Novo' dispatch={async () => await initUsers()}/>
                 </header>
-                <main className="flex flex-grow h-full">
+                <main className="flex flex-grow h-1 overflow-y-auto">
                     {/* When not exists any data */}
                     {!existsData &&
                         <div className="flex flex-col gap-3 justify-center items-center w-full text-center">
