@@ -13,6 +13,7 @@ import {UserApi} from "@/apis/user.api";
 import {getInitials} from "@/common/utils/str.utils";
 import {debounce} from "next/dist/server/utils";
 import {Pagination} from "@/components/common/pagination.component";
+import {Skeleton} from "@/components/ui/skeleton";
 
 export default function Page() {
     const userApi = new UserApi();
@@ -20,21 +21,25 @@ export default function Page() {
     const [users, setUsers] = useState<User[]>([]);
 
     const [searchWord, setSearchWord] = useState<string>("");
-    const [existsData, setExistsData] = useState<boolean>(false);
     const [previousFilter, setPreviousFilter] = useState<FilterUser>({page: 1, size: 10});
     const [totalItems, setTotalItems] = useState<number>(0);
 
+    // Loading states
+    const [loading, setLoading] = useState<boolean>(false);
+    const [existsData, setExistsData] = useState<boolean>(false);
+
     const initUsers = async (filter?: FilterUser): Promise<void> => {
         const finalFilter = {page: 1, ...filter, size: 10}
+
+        setLoading(true);
 
         const {items, total} = await userApi
             .find(finalFilter)
             .catch(() => ({items: [], total: 0}))
             .finally(() => {
-                setPreviousFilter(finalFilter)
+                setPreviousFilter(finalFilter);
+                setLoading(false);
             })
-
-        setExistsData(!!total);
 
         const processedUsers = items.map((user) => {
             if (user.avatar) {
@@ -47,6 +52,8 @@ export default function Page() {
             }
             return user;
         });
+
+        if (!existsData) setExistsData(!!total);
 
         setUsers(processedUsers);
         setTotalItems(total);
@@ -110,8 +117,25 @@ export default function Page() {
                     <NewUserComponent label='Novo' dispatch={async () => await initUsers()}/>
                 </header>
                 <main className="flex flex-grow h-1 overflow-y-auto">
+                    {/* When loading */}
+                    {loading &&
+                        <ul className="w-full">
+                            {Array.from({length: 11}).map((_, index) => (
+                                <li key={index} className="mt-2 w-full">
+                                    <div className="flex gap-3 justify-start items-center w-full">
+                                        <Skeleton className="h-12 w-12 rounded-full"/>
+                                        <div className="space-y-2 w-full">
+                                            <Skeleton className="h-4 w-[100%]"/>
+                                            <Skeleton className="h-4 w-[80%]"/>
+                                        </div>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    }
+
                     {/* When not exists any data */}
-                    {!existsData &&
+                    {(!loading && !existsData) &&
                         <div className="flex flex-col gap-3 justify-center items-center w-full text-center">
                             <span className="font-bold text-xl">Usuários nâo encontrados</span>
                             <span>Você ainda nâo cadastrou nenhum usuário, cadastre um novo usuãrio.</span>
@@ -123,7 +147,7 @@ export default function Page() {
                     }
 
                     {/* When exists data but not return anything */}
-                    {(existsData && !users.length) &&
+                    {(!loading && !users.length && searchWord.length) &&
                         <div className="flex flex-col gap-3 justify-center items-center w-full">
                             <span>Usuario não encontrado</span>
                             <span className="text-center">
@@ -143,7 +167,7 @@ export default function Page() {
                     }
 
                     {/* When exists data and return users */}
-                    {(existsData && users.length) &&
+                    {(!loading && users.length) &&
                         <Table>
                             <TableHeader>
                                 <TableRow>
