@@ -31,6 +31,7 @@ interface NewUserComponentProps {
 
 export function NewUserComponent(props: NewUserComponentProps) {
     const {dispatch, label = 'Novo'} = props;
+
     const userApi = new UserApi();
 
     // User data
@@ -46,34 +47,51 @@ export function NewUserComponent(props: NewUserComponentProps) {
     const [file, setFile] = useState<any>(null);
     const [preview, setPreview] = useState<any>('');
 
+    /**
+     * @todo - implement to when press Enter submit to create user
+     */
+        // useEffect(() => {
+        //     const handleKeyDown = ({key}: any) => {
+        //         if (key === Keys.ENTER) console.log('Clicked in enter')
+        //     }
+        //
+        //     document.removeEventListener("keydown", handleKeyDown);
+        //
+        //     document.addEventListener("keydown", handleKeyDown, true);
+        //
+        //     return () => {
+        //         document.removeEventListener("keydown", handleKeyDown);
+        //     }
+        // }, []);
+
     const submit = async (): Promise<void> => {
-        const result = await readFile(file);
+            const result = await readFile(file);
 
 
-        const user: Omit<User, '_id' | 'status'> = {
-            name,
-            email,
-            alias,
-            phone,
-            birthday,
-            password,
-            confirmPassword: password,
-            color,
-            avatar: JSON.stringify({image: result})
-        } as Omit<User, '_id' | 'status'>;
+            const user: Omit<User, '_id' | 'status'> = {
+                name,
+                email,
+                alias,
+                phone,
+                birthday,
+                password,
+                confirmPassword: password,
+                color,
+                avatar: JSON.stringify({image: result})
+            } as Omit<User, '_id' | 'status'>;
 
-        await userApi.create(user).then(() => {
-            clearStates();
-            dispatch();
-        });
-    }
+            await userApi.create(user).then(() => {
+                clearStates();
+                dispatch();
+            });
+        }
 
     const clearStates = (): void => {
         setName("");
         setEmail("");
         setAlias("");
         setPhone("");
-        setPassword("");
+        setPassword(generateSmallHash());
     }
 
     const colors: ColorObj[] = [

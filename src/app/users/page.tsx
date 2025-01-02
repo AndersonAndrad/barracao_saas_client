@@ -12,6 +12,7 @@ import {PageTemplateComponent} from "@/components/common/page-template.component
 import {UserApi} from "@/apis/user.api";
 import {getInitials} from "@/common/utils/str.utils";
 import {debounce} from "next/dist/server/utils";
+import {Pagination} from "@/components/common/pagination.component";
 
 export default function Page() {
     const userApi = new UserApi();
@@ -21,6 +22,7 @@ export default function Page() {
     const [searchWord, setSearchWord] = useState<string>("");
     const [existsData, setExistsData] = useState<boolean>(false);
     const [previousFilter, setPreviousFilter] = useState<FilterUser>({page: 1, size: 10});
+    const [totalItems, setTotalItems] = useState<number>(0);
 
     const initUsers = async (filter?: FilterUser): Promise<void> => {
         const finalFilter = {page: 1, ...filter, size: 10}
@@ -47,6 +49,7 @@ export default function Page() {
         });
 
         setUsers(processedUsers);
+        setTotalItems(total);
     };
 
     const searchUserByWord = async (word: string): Promise<void> => {
@@ -58,11 +61,11 @@ export default function Page() {
 
         word = word.trim().replace(/\s+/g, ' ');
 
-        const method = debounce(async (word: string) => {
+        const searchWithDebounce = debounce(async (word: string) => {
             await initUsers({...previousFilter, word});
         }, 750)
 
-        method(word);
+        searchWithDebounce(word);
         setSearchWord(word);
     }
 
@@ -177,10 +180,12 @@ export default function Page() {
                     }
                 </main>
                 {existsData &&
-                    <footer className="flex justify-between">
-                        <Button variant='ghost'>Anterior</Button>
-                        <span>1/10</span>
-                        <Button variant='ghost'>Próxima</Button>
+                    <footer>
+                        <Pagination
+                            totalItems={totalItems}
+                            currentPage={previousFilter.page}
+                            onPageChange={async (page) => initUsers({...previousFilter, page})}
+                        />
                     </footer>
                 }
             </div>
