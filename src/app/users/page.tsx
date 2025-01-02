@@ -14,6 +14,7 @@ import {getInitials} from "@/common/utils/str.utils";
 import {debounce} from "next/dist/server/utils";
 import {Pagination} from "@/components/common/pagination.component";
 import {Skeleton} from "@/components/ui/skeleton";
+import {formatPhoneNumber} from "@/common/utils/format.utils";
 
 export default function Page() {
     const userApi = new UserApi();
@@ -192,7 +193,7 @@ export default function Page() {
                                             </div>
                                         </TableCell>
                                         <TableCell>{user?.alias ?? '-'}</TableCell>
-                                        <TableCell>{user?.phone ?? '-'}</TableCell>
+                                        <TableCell>{formatPhoneNumber(user?.phone ?? '-')}</TableCell>
                                         <TableCell>{getUserStatus(user?.status)}</TableCell>
                                         <TableCell>
 
