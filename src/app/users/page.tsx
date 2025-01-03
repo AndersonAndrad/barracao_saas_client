@@ -15,6 +15,17 @@ import {debounce} from "next/dist/server/utils";
 import {Pagination} from "@/components/common/pagination.component";
 import {Skeleton} from "@/components/ui/skeleton";
 import {formatPhoneNumber} from "@/common/utils/format.utils";
+import {Check, EllipsisVertical, X} from "lucide-react";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from "@/components/ui/dialog";
 
 export default function Page() {
     const userApi = new UserApi();
@@ -28,6 +39,9 @@ export default function Page() {
     // Loading states
     const [loading, setLoading] = useState<boolean>(false);
     const [existsData, setExistsData] = useState<boolean>(false);
+
+    // aux components states
+    const [updatePasswordOpened, setUpdatePasswordOpened] = useState<boolean>(false);
 
     const initUsers = async (filter?: FilterUser): Promise<void> => {
         const finalFilter = {page: 1, ...filter, size: 10}
@@ -105,115 +119,163 @@ export default function Page() {
     }, [searchWord]);
 
     return (
-        <PageTemplateComponent title='Usuários'>
-            <div className="flex flex-col gap-3 h-full">
-                <header className="flex justify-end gap-3">
-                    <div>
-                        <Input
-                            placeholder='Nome ou Apelido'
-                            onChange={(event) => setSearchWord(event.target.value)}
-                            value={searchWord}
-                        />
-                    </div>
-                    <NewUserComponent label='Novo' dispatch={async () => await initUsers()}/>
-                </header>
-                <main className="flex flex-grow h-1 overflow-y-auto">
-                    {/* When loading */}
-                    {loading &&
-                        <ul className="w-full">
-                            {Array.from({length: 11}).map((_, index) => (
-                                <li key={index} className="mt-2 w-full">
-                                    <div className="flex gap-3 justify-start items-center w-full">
-                                        <Skeleton className="h-12 w-12 rounded-full"/>
-                                        <div className="space-y-2 w-full">
-                                            <Skeleton className="h-4 w-[100%]"/>
-                                            <Skeleton className="h-4 w-[80%]"/>
-                                        </div>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                    }
-
-                    {/* When not exists any data */}
-                    {(!loading && !existsData) &&
-                        <div className="flex flex-col gap-3 justify-center items-center w-full text-center">
-                            <span className="font-bold text-xl">Usuários nâo encontrados</span>
-                            <span>Você ainda nâo cadastrou nenhum usuário, cadastre um novo usuãrio.</span>
-                            <NewUserComponent
-                                label='Cadastrar novo usuário'
-                                dispatch={async () => await initUsers()}
+        <>
+            <PageTemplateComponent title='Usuários'>
+                <div className="flex flex-col gap-3 h-full">
+                    <header className="flex justify-end gap-3">
+                        <div>
+                            <Input
+                                placeholder='Nome ou Apelido'
+                                onChange={(event) => setSearchWord(event.target.value)}
+                                value={searchWord}
                             />
                         </div>
-                    }
+                        <NewUserComponent label='Novo' dispatch={async () => await initUsers()}/>
+                    </header>
+                    <main className="flex flex-grow h-1 overflow-y-auto">
+                        {/* When loading */}
+                        {loading &&
+                            <ul className="w-full">
+                                {Array.from({length: 11}).map((_, index) => (
+                                    <li key={index} className="mt-2 w-full">
+                                        <div className="flex gap-3 justify-start items-center w-full">
+                                            <Skeleton className="h-12 w-12 rounded-full"/>
+                                            <div className="space-y-2 w-full">
+                                                <Skeleton className="h-4 w-[100%]"/>
+                                                <Skeleton className="h-4 w-[80%]"/>
+                                            </div>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        }
 
-                    {/* When exists data but not return anything */}
-                    {(!loading && !users.length && searchWord.length) &&
-                        <div className="flex flex-col gap-3 justify-center items-center w-full">
-                            <span>Usuario não encontrado</span>
-                            <span className="text-center">
-                                {`Você pesquisou por "${searchWord}" mas não foi encontrado nenhum registro. Você pode fazer uma nova`}
-                                <br/>
-                                {` pesquisa ou cadastrar um novo usuário.`}
-                            </span>
-                            <div className="flex gap-3">
-                                <Button variant="secondary" onClick={() => {
-                                }}>Nova pesquisa</Button>
+                        {/* When not exists any data */}
+                        {(!loading && !existsData) &&
+                            <div className="flex flex-col gap-3 justify-center items-center w-full text-center">
+                                <span className="font-bold text-xl">Usuários nâo encontrados</span>
+                                <span>Você ainda nâo cadastrou nenhum usuário, cadastre um novo usuãrio.</span>
                                 <NewUserComponent
                                     label='Cadastrar novo usuário'
                                     dispatch={async () => await initUsers()}
                                 />
                             </div>
-                        </div>
-                    }
+                        }
 
-                    {/* When exists data and return users */}
-                    {(!loading && users.length) &&
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Nome</TableHead>
-                                    <TableHead>Apelido</TableHead>
-                                    <TableHead>Telefone</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead></TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {users.map((user) => (
-                                    <TableRow key={user._id}>
-                                        <TableCell className='flex gap-3 items-center'>
-                                            <Avatar>
-                                                <AvatarImage src={user.avatar}/>
-                                                <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-                                            </Avatar>
-                                            <div className='flex flex-col gap-1'>
-                                                <span className='text-base font-semibold'>{user?.name ?? '-'}</span>
-                                                <span className='text-xs'>{user?.email ?? '-'}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>{user?.alias ?? '-'}</TableCell>
-                                        <TableCell>{formatPhoneNumber(user?.phone ?? '-')}</TableCell>
-                                        <TableCell>{getUserStatus(user?.status)}</TableCell>
-                                        <TableCell>
+                        {/* When exists data but not return anything */}
+                        {(!loading && !users.length && searchWord.length) &&
+                            <div className="flex flex-col gap-3 justify-center items-center w-full">
+                                <span>Usuario não encontrado</span>
+                                <span className="text-center">
+                                {`Você pesquisou por "${searchWord}" mas não foi encontrado nenhum registro. Você pode fazer uma nova`}
+                                    <br/>
+                                    {` pesquisa ou cadastrar um novo usuário.`}
+                            </span>
+                                <div className="flex gap-3">
+                                    <Button variant="secondary" onClick={() => {
+                                    }}>Nova pesquisa</Button>
+                                    <NewUserComponent
+                                        label='Cadastrar novo usuário'
+                                        dispatch={async () => await initUsers()}
+                                    />
+                                </div>
+                            </div>
+                        }
 
-                                        </TableCell>
+                        {/* When exists data and return users */}
+                        {(!loading && users.length) &&
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Nome</TableHead>
+                                        <TableHead>Apelido</TableHead>
+                                        <TableHead>Telefone</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead></TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                </TableHeader>
+                                <TableBody>
+                                    {users.map((user) => (
+                                        <TableRow key={user._id}>
+                                            <TableCell className='flex gap-3 items-center'>
+                                                <Avatar>
+                                                    <AvatarImage src={user.avatar}/>
+                                                    <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                                                </Avatar>
+                                                <div className='flex flex-col gap-1'>
+                                                    <span className='text-base font-semibold'>{user?.name ?? '-'}</span>
+                                                    <span className='text-xs'>{user?.email ?? '-'}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>{user?.alias ?? '-'}</TableCell>
+                                            <TableCell>{formatPhoneNumber(user?.phone ?? '-')}</TableCell>
+                                            <TableCell>{getUserStatus(user?.status)}</TableCell>
+                                            <TableCell>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant='ghost'><EllipsisVertical/></Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent>
+                                                        <DropdownMenuItem
+                                                            className='cursor-pointer'
+                                                            onClick={() => setUpdatePasswordOpened(true)}
+                                                        >
+                                                            Alterar senha
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        }
+                    </main>
+                    {existsData &&
+                        <footer>
+                            <Pagination
+                                totalItems={totalItems}
+                                currentPage={previousFilter.page}
+                                onPageChange={async (page) => initUsers({...previousFilter, page})}
+                            />
+                        </footer>
                     }
-                </main>
-                {existsData &&
-                    <footer>
-                        <Pagination
-                            totalItems={totalItems}
-                            currentPage={previousFilter.page}
-                            onPageChange={async (page) => initUsers({...previousFilter, page})}
-                        />
-                    </footer>
-                }
-            </div>
-        </PageTemplateComponent>
+                </div>
+            </PageTemplateComponent>
+
+            {/* Aux components */}
+
+            <Dialog open={updatePasswordOpened} onOpenChange={() => setUpdatePasswordOpened(false)}>
+                <DialogTrigger asChild>
+                    <span>Alterar senha</span>
+                </DialogTrigger>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Atualização de senha</DialogTitle>
+                        <DialogDescription>Atualização de senha de acesso a plataforma</DialogDescription>
+                    </DialogHeader>
+                    <div className='flex flex-col gap-3'>
+                        <div className="flex flex-col gap-2 w-full">
+                            <label className='cursor-pointer' htmlFor="currentPassword">Senha Atual</label>
+                            <Input id="currentPassword" placeholder='Senha atual'/>
+                        </div>
+
+                        <div className="flex flex-col gap-2 w-full">
+                            <label className='cursor-pointer' htmlFor="currentPassword">Nova senha</label>
+                            <Input id="currentPassword" placeholder='Sua nova senha'/>
+                        </div>
+
+                        <div className="flex flex-col gap-2 w-full">
+                            <label className='cursor-pointer' htmlFor="currentPassword">Confirme sua nova senha</label>
+                            <Input id="currentPassword" placeholder='Confirme sua nova senha'/>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant='ghost'>Cancelar <X/></Button>
+                        <Button>Salvar <Check/></Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </>
     )
 }
