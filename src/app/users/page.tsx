@@ -19,6 +19,7 @@ import {Check, EllipsisVertical, X} from "lucide-react";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {
     Dialog,
+    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
@@ -26,6 +27,10 @@ import {
     DialogTitle,
     DialogTrigger
 } from "@/components/ui/dialog";
+import {DatePicker} from "@/components/ui/date-picker";
+import {ColorObj, SelectColorsComponent} from "@/components/users/select-colors.component";
+import {UploadImage} from "@/components/common/upload-image.component";
+import {generateSmallHash} from "@/common/utils/hash.utils";
 
 export default function Page() {
     const userApi = new UserApi();
@@ -42,6 +47,20 @@ export default function Page() {
 
     // aux components states
     const [updatePasswordOpened, setUpdatePasswordOpened] = useState<boolean>(false);
+    const [updateUserOpened, setUpdateUserOpened] = useState<boolean>(false);
+
+    // Update user data
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [alias, setAlias] = useState('');
+    const [phone, setPhone] = useState('');
+    const [birthday, setBirthday] = useState<Date>(new Date());
+    const [password, setPassword] = useState(generateSmallHash());
+    const [color, setColor] = useState<string>('');
+
+    // File state
+    const [file, setFile] = useState<any>(null);
+    const [preview, setPreview] = useState<any>('');
 
     const initUsers = async (filter?: FilterUser): Promise<void> => {
         const finalFilter = {page: 1, ...filter, size: 10}
@@ -106,6 +125,9 @@ export default function Page() {
         }
     }
 
+    const update = async () => {
+    }
+
     useEffect(() => {
         initUsers();
     }, []);
@@ -118,8 +140,21 @@ export default function Page() {
         return () => clearTimeout(handler); // Clear timeout on each change
     }, [searchWord]);
 
+    const colors: ColorObj[] = [
+        {id: generateSmallHash(), hex: '#E2E7EE', selected: false},
+        {id: generateSmallHash(), hex: '#92CEF7', selected: false},
+        {id: generateSmallHash(), hex: '#BEB8FA', selected: false},
+        {id: generateSmallHash(), hex: '#98DD98', selected: false},
+        {id: generateSmallHash(), hex: '#ECDC83', selected: false},
+        {id: generateSmallHash(), hex: '#C84A4A', selected: false},
+        {id: generateSmallHash(), hex: '#A00A0A', selected: false},
+        {id: generateSmallHash(), hex: '#73A8CC', selected: false},
+        {id: generateSmallHash(), hex: '#878C93', selected: false},
+    ];
+
     return (
         <>
+            {/* List users */}
             <PageTemplateComponent title='Usuários'>
                 <div className="flex flex-col gap-3 h-full">
                     <header className="flex justify-end gap-3">
@@ -222,6 +257,12 @@ export default function Page() {
                                                         >
                                                             Alterar senha
                                                         </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            className='cursosr-pointer'
+                                                            onClick={() => setUpdateUserOpened(true)}
+                                                        >
+                                                            Atualizar usuário
+                                                        </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
                                             </TableCell>
@@ -243,8 +284,9 @@ export default function Page() {
                 </div>
             </PageTemplateComponent>
 
-            {/* Aux components */}
+            {/* ----- Aux components ----- */}
 
+            {/* Update password */}
             <Dialog open={updatePasswordOpened} onOpenChange={() => setUpdatePasswordOpened(false)}>
                 <DialogTrigger asChild>
                     <span>Alterar senha</span>
@@ -273,6 +315,111 @@ export default function Page() {
                     <DialogFooter>
                         <Button variant='ghost'>Cancelar <X/></Button>
                         <Button>Salvar <Check/></Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Update user */}
+            <Dialog open={updateUserOpened} onOpenChange={() => setUpdateUserOpened(false)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="font-bold">Atualização de cadastro</DialogTitle>
+                        <DialogDescription>Atualização de dados cadastrais</DialogDescription>
+                    </DialogHeader>
+                    <div className="flex flex-col gap-3">
+                        {/* Full name */}
+                        <div className="flex flex-col gap-1">
+                            <label htmlFor="fullName">Nome completo</label>
+                            <Input
+                                id="fullName"
+                                onChange={(event) => setName(event.target.value)}
+                                value={name}
+                            />
+                        </div>
+
+                        <div className="flex gap-3">
+                            {/* alias */}
+                            <div className="flex w-full flex-col gap-1">
+                                <label htmlFor="alias">Apelido</label>
+                                <Input
+                                    id="alias"
+                                    onChange={(event) => setAlias(event.target.value)}
+                                    value={alias}
+                                />
+                            </div>
+
+                            {/* phone */}
+                            <div className="flex w-full flex-col gap-1">
+                                <label htmlFor="phone">Telefone</label>
+                                <Input
+                                    id="phone"
+                                    onChange={(event) => setPhone(event.target.value)}
+                                    value={phone}
+                                />
+                            </div>
+                        </div>
+
+                        {/* email */}
+                        <div className="flex flex-col gap-1">
+                            <label htmlFor="email">Email</label>
+                            <Input
+                                id="email"
+                                onChange={(event) => setEmail(event.target.value)}
+                                value={email}
+                            />
+                        </div>
+
+                        <div className="flex gap-3">
+                            {/* birthday */}
+                            <div className="flex w-full flex-col gap-1">
+                                <label htmlFor="birthday">Aniversário</label>
+                                <DatePicker onSelect={setBirthday} selected={birthday}/>
+                            </div>
+
+                            {/* temporary password */}
+                            <div className="flex w-full flex-col gap-1">
+                                <label htmlFor="temporaryPassword">Senha temporária</label>
+                                <Input
+                                    id="temporaryPassword"
+                                    onChange={(event) => setPassword(event.target.value)}
+                                    value={password}
+                                />
+                            </div>
+                        </div>
+
+                        {/* color */}
+                        <div className="flex flex-col w-full gap-1">
+                            <label htmlFor="temporaryPassword">Qual a cor do seu Orixá?</label>
+                            <SelectColorsComponent
+                                colors={colors}
+                                onSelectColor={setColor}
+                            />
+                        </div>
+
+                        {/* Avatar */}
+                        <div className="flex flex-col w-full gap-1">
+                            <label htmlFor="temporaryPassword">Foto de perfil</label>
+                            <div className="flex gap-3 items-center">
+                                <Avatar>
+                                    <AvatarImage src={preview}/>
+                                    <AvatarFallback>{getInitials(name)}</AvatarFallback>
+                                </Avatar>
+                                <UploadImage
+                                    onPreview={setPreview}
+                                    onUpload={setFile}
+                                    label="Selecionar foto"
+                                />
+                            </div>
+
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button variant="ghost">Cancelar <X/></Button>
+                        </DialogClose>
+                        <DialogClose asChild>
+                            <Button onClick={async () => await update()}>Salvar <Check/></Button>
+                        </DialogClose>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
