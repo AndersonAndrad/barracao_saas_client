@@ -31,6 +31,7 @@ import {DatePicker} from "@/components/ui/date-picker";
 import {SelectColorsComponent} from "@/components/users/select-colors.component";
 import {UploadImage} from "@/components/common/upload-image.component";
 import {generateSmallHash} from "@/common/utils/hash.utils";
+import {readFile} from "@/common/utils/file.utils";
 
 export default function Page() {
     const userApi = new UserApi();
@@ -58,6 +59,7 @@ export default function Page() {
     const [password, setPassword] = useState(generateSmallHash());
     const [color, setColor] = useState<string>('');
     const [userToUpdate, setUserToUpdate] = useState<User | null>(null);
+    const [status, setStatus] = useState<UserStatus>();
 
     // Update user password
     const [confirmationPassword, setConfirmationPassword] = useState<string>('');
@@ -132,6 +134,35 @@ export default function Page() {
     }
 
     const update = async () => {
+        if (!userToUpdate) return;
+
+        const result = await readFile(file);
+
+        const userUpdate: Partial<User> = {
+            ...userToUpdate,
+            name,
+            email,
+            alias,
+            phone,
+            birthday,
+            color,
+            avatar: JSON.stringify({image: result}),
+            status
+        }
+
+        await userApi.updateOne(userToUpdate._id, userUpdate)
+            .then(() => {
+                clearStates();
+                initUsers();
+            });
+    }
+
+    const clearStates = (): void => {
+        setName("");
+        setEmail("");
+        setAlias("");
+        setPhone("");
+        setColor('');
     }
 
     const updatePassword = async (): Promise<void> => {
@@ -152,6 +183,18 @@ export default function Page() {
                 setConfirmationPassword('');
                 initUsers();
             })
+    }
+
+    const prepareToUpdate = (user: User) => {
+        setUpdateUserOpened(true);
+        setUserToUpdate(user);
+
+        setName(user.name);
+        setEmail(user.email);
+        setPhone(user.phone);
+        setBirthday(user.birthday);
+        setAlias(user.alias);
+        setColor(user.color);
     }
 
     useEffect(() => {
@@ -276,10 +319,7 @@ export default function Page() {
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem
                                                             className='cursosr-pointer'
-                                                            onClick={() => {
-                                                                setUpdateUserOpened(true);
-                                                                setUserToUpdate(user);
-                                                            }}
+                                                            onClick={() => prepareToUpdate(user)}
                                                         >
                                                             Atualizar usuário
                                                         </DropdownMenuItem>
@@ -419,16 +459,6 @@ export default function Page() {
                             <div className="flex w-full flex-col gap-1">
                                 <label htmlFor="birthday">Aniversário</label>
                                 <DatePicker onSelect={setBirthday} selected={birthday}/>
-                            </div>
-
-                            {/* temporary password */}
-                            <div className="flex w-full flex-col gap-1">
-                                <label htmlFor="temporaryPassword">Senha temporária</label>
-                                <Input
-                                    id="temporaryPassword"
-                                    onChange={(event) => setPassword(event.target.value)}
-                                    value={password}
-                                />
                             </div>
                         </div>
 
