@@ -31,6 +31,15 @@ import {SelectColorsComponent} from "@/components/users/select-colors.component"
 import {UploadImage} from "@/components/common/upload-image.component";
 import {generateSmallHash} from "@/common/utils/hash.utils";
 import {readFile} from "@/common/utils/file.utils";
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
 
 export default function Page() {
     const userApi = new UserApi();
@@ -194,6 +203,7 @@ export default function Page() {
         setBirthday(user.birthday);
         setAlias(user.alias);
         setColor(user.color);
+        setStatus(user.status as UserStatus);
     }
 
     useEffect(() => {
@@ -456,6 +466,24 @@ export default function Page() {
                                 <label htmlFor="birthday">Aniversário</label>
                                 <DatePicker onSelect={setBirthday} selected={birthday}/>
                             </div>
+
+                            {/* Status */}
+                            <div className="flex w-full flex-col gap-1">
+                                <label htmlFor="birthday">Status</label>
+                                <Select onValueChange={(value) => setStatus(value as UserStatus)}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder='Selecione o status'></SelectValue>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Status</SelectLabel>
+                                            <SelectItem value={UserStatus.ENABLE}>Habilitado</SelectItem>
+                                            <SelectItem value={UserStatus.DISABLED}>Desligado</SelectItem>
+                                            <SelectItem value={UserStatus.AWAY}>Distante</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
 
                         {/* color */}
@@ -464,6 +492,7 @@ export default function Page() {
                             <SelectColorsComponent
                                 colors={colors}
                                 onSelectColor={setColor}
+                                previewColor={userToUpdate?.color}
                             />
                         </div>
 

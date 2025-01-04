@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {CircleSlash2} from "lucide-react";
 
 export interface ColorObj {
@@ -9,10 +9,11 @@ export interface ColorObj {
 
 interface SelectColorsProps {
     colors: ColorObj[];
+    previewColor?: string;
     onSelectColor: (hex: string) => void;
 }
 
-export function SelectColorsComponent({colors = [], onSelectColor}: SelectColorsProps) {
+export function SelectColorsComponent({colors = [], onSelectColor, ...rest}: SelectColorsProps) {
     const NULL_COLOR_ID: string = 'null-color';
     const insertNullColor = (colors: ColorObj[]): ColorObj[] => {
         const nullColor: ColorObj = {
@@ -39,6 +40,14 @@ export function SelectColorsComponent({colors = [], onSelectColor}: SelectColors
 
         setLocalColors(insertNullColor(colors));
     }
+
+    useEffect(() => {
+        if (rest?.previewColor) {
+            const color = localColors.find(color => color.hex === rest.previewColor);
+
+            if (color) selectColor(color.id)
+        }
+    }, [])
 
     return (
         <ul className="flex w-full justify-between items-center">
