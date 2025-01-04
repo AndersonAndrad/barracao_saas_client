@@ -1,7 +1,7 @@
 'use client';
 
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
-import {FilterUser, User, UserStatus} from "@/core/interfaces/user.interface";
+import {colors, FilterUser, UpdatePassword, User, UserStatus} from "@/core/interfaces/user.interface";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {useEffect, useState} from "react";
 
@@ -15,7 +15,7 @@ import {debounce} from "next/dist/server/utils";
 import {Pagination} from "@/components/common/pagination.component";
 import {Skeleton} from "@/components/ui/skeleton";
 import {formatPhoneNumber} from "@/common/utils/format.utils";
-import {Check, EllipsisVertical, X} from "lucide-react";
+import {Check, EllipsisVertical, Eye, EyeClosed, X} from "lucide-react";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {
     Dialog,
@@ -28,7 +28,7 @@ import {
     DialogTrigger
 } from "@/components/ui/dialog";
 import {DatePicker} from "@/components/ui/date-picker";
-import {ColorObj, SelectColorsComponent} from "@/components/users/select-colors.component";
+import {SelectColorsComponent} from "@/components/users/select-colors.component";
 import {UploadImage} from "@/components/common/upload-image.component";
 import {generateSmallHash} from "@/common/utils/hash.utils";
 
@@ -57,6 +57,12 @@ export default function Page() {
     const [birthday, setBirthday] = useState<Date>(new Date());
     const [password, setPassword] = useState(generateSmallHash());
     const [color, setColor] = useState<string>('');
+    const [userToUpdate, setUserToUpdate] = useState<User | null>(null);
+
+    // Update user password
+    const [confirmationPassword, setConfirmationPassword] = useState<string>('');
+    const [newPassword, setNewPassword] = useState<string>('');
+    const [seeAllPassword, setSeeAllPassword] = useState<boolean>(false);
 
     // File state
     const [file, setFile] = useState<any>(null);
@@ -128,6 +134,26 @@ export default function Page() {
     const update = async () => {
     }
 
+    const updatePassword = async (): Promise<void> => {
+        if (!userToUpdate) return;
+
+        const updatePassword: UpdatePassword = {
+            password,
+            newPassword,
+            confirmationPassword
+        }
+
+        await userApi.updatePassword(userToUpdate._id, updatePassword)
+            .then(() => {
+                setUserToUpdate(null);
+                setUpdatePasswordOpened(false);
+                setPassword('');
+                setNewPassword('');
+                setConfirmationPassword('');
+                initUsers();
+            })
+    }
+
     useEffect(() => {
         initUsers();
     }, []);
@@ -139,18 +165,6 @@ export default function Page() {
 
         return () => clearTimeout(handler); // Clear timeout on each change
     }, [searchWord]);
-
-    const colors: ColorObj[] = [
-        {id: generateSmallHash(), hex: '#E2E7EE', selected: false},
-        {id: generateSmallHash(), hex: '#92CEF7', selected: false},
-        {id: generateSmallHash(), hex: '#BEB8FA', selected: false},
-        {id: generateSmallHash(), hex: '#98DD98', selected: false},
-        {id: generateSmallHash(), hex: '#ECDC83', selected: false},
-        {id: generateSmallHash(), hex: '#C84A4A', selected: false},
-        {id: generateSmallHash(), hex: '#A00A0A', selected: false},
-        {id: generateSmallHash(), hex: '#73A8CC', selected: false},
-        {id: generateSmallHash(), hex: '#878C93', selected: false},
-    ];
 
     return (
         <>
@@ -253,13 +267,19 @@ export default function Page() {
                                                     <DropdownMenuContent>
                                                         <DropdownMenuItem
                                                             className='cursor-pointer'
-                                                            onClick={() => setUpdatePasswordOpened(true)}
+                                                            onClick={() => {
+                                                                setUpdatePasswordOpened(true);
+                                                                setUserToUpdate(user);
+                                                            }}
                                                         >
                                                             Alterar senha
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem
                                                             className='cursosr-pointer'
-                                                            onClick={() => setUpdateUserOpened(true)}
+                                                            onClick={() => {
+                                                                setUpdateUserOpened(true);
+                                                                setUserToUpdate(user);
+                                                            }}
                                                         >
                                                             Atualizar usuário
                                                         </DropdownMenuItem>
@@ -297,24 +317,49 @@ export default function Page() {
                         <DialogDescription>Atualização de senha de acesso a plataforma</DialogDescription>
                     </DialogHeader>
                     <div className='flex flex-col gap-3'>
+                        <header className='flex w-full justify-end'>
+                            <Button
+                                variant='ghost'
+                                onClick={() => {
+                                    setSeeAllPassword(!seeAllPassword)
+                                }}
+                            >
+                                {seeAllPassword &&
+                                    <span className='flex gap-3 items-center'>Esconder senhas <EyeClosed/></span>}
+                                {!seeAllPassword && <span className='flex gap-3 items-center'>Ver senhas <Eye/></span>}
+                            </Button>
+                        </header>
                         <div className="flex flex-col gap-2 w-full">
                             <label className='cursor-pointer' htmlFor="currentPassword">Senha Atual</label>
-                            <Input id="currentPassword" placeholder='Senha atual'/>
+                            <Input id="currentPassword" placeholder='Senha atual'
+                                   type={seeAllPassword ? 'text' : 'password'} value={password} onChange={(event) => {
+                                setPassword(event.target.value)
+                            }}/>
                         </div>
 
                         <div className="flex flex-col gap-2 w-full">
-                            <label className='cursor-pointer' htmlFor="currentPassword">Nova senha</label>
-                            <Input id="currentPassword" placeholder='Sua nova senha'/>
+                            <label className='cursor-pointer' htmlFor="newPassword">Nova senha</label>
+                            <Input id="newPassword" placeholder='Sua nova senha'
+                                   type={seeAllPassword ? 'text' : 'password'} value={newPassword}
+                                   onChange={(event) => {
+                                       setNewPassword(event.target.value)
+                                   }}/>
                         </div>
 
                         <div className="flex flex-col gap-2 w-full">
-                            <label className='cursor-pointer' htmlFor="currentPassword">Confirme sua nova senha</label>
-                            <Input id="currentPassword" placeholder='Confirme sua nova senha'/>
+                            <label className='cursor-pointer' htmlFor="confirmPassword">Confirme sua nova senha</label>
+                            <Input id="confirmPassword" placeholder='Confirme sua nova senha'
+                                   type={seeAllPassword ? 'text' : 'password'} value={confirmationPassword}
+                                   onChange={(event) => {
+                                       setConfirmationPassword(event.target.value)
+                                   }}/>
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant='ghost'>Cancelar <X/></Button>
-                        <Button>Salvar <Check/></Button>
+                        <DialogClose asChild>
+                            <Button variant='ghost'>Cancelar <X/></Button>
+                        </DialogClose>
+                        <Button onClick={async () => await updatePassword()}>Salvar <Check/></Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

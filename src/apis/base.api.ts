@@ -19,7 +19,7 @@ export class BaseApi<T> {
 
     findFailureMessage: string = 'Entity finds failed';
 
-    private readonly serverApi: AxiosInstance = axios.create({
+    readonly serverApi: AxiosInstance = axios.create({
         baseURL: process.env.REACT_APP_API_SERVER || 'http://localhost:4001',
         headers: {
             Accept: "*/*",
