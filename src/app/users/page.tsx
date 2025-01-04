@@ -24,8 +24,7 @@ import {
     DialogDescription,
     DialogFooter,
     DialogHeader,
-    DialogTitle,
-    DialogTrigger
+    DialogTitle
 } from "@/components/ui/dialog";
 import {DatePicker} from "@/components/ui/date-picker";
 import {SelectColorsComponent} from "@/components/users/select-colors.component";
@@ -348,9 +347,6 @@ export default function Page() {
 
             {/* Update password */}
             <Dialog open={updatePasswordOpened} onOpenChange={() => setUpdatePasswordOpened(false)}>
-                <DialogTrigger asChild>
-                    <span>Alterar senha</span>
-                </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Atualização de senha</DialogTitle>
