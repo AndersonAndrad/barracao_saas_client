@@ -6,6 +6,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { AppSidebar } from "@/components/common/app-sidebar.component";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import type { Metadata } from "next";
+import { LoginPage } from "./login/login.page";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -38,14 +39,17 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
-                <SidebarProvider>
-                    {isLoged && <AppSidebar />}
-                    <main className="flex w-full h-screen">
-                        {/*<SidebarProvider/>*/}
-                        <div className="flex-grow h-screen p-3">{children}</div>
-                    </main>
+                <>
+                    {isLoged && <SidebarProvider>
+                        <AppSidebar />
+                        <main className="flex w-full h-screen">
+                            {/*<SidebarProvider/>*/}
+                            <div className="flex-grow h-screen p-3">{children}</div>
+                        </main>
+                    </SidebarProvider>}
 
-                </SidebarProvider>
+                    {!isLoged && <LoginPage />}
+                </>
             </body>
         </html>
     );
