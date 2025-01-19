@@ -4,9 +4,9 @@ import "./globals.css";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { AppSidebar } from "@/components/common/app-sidebar.component";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import type { Metadata } from "next";
 import { LoginPage } from "./login/login.page";
+import type { Metadata } from "next";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
-    const isLoged: boolean = true;
+    const isLoged: boolean = false;
 
     return (
         <html lang="en">
