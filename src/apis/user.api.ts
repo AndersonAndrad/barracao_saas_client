@@ -1,14 +1,18 @@
-import {BaseApi} from "@/apis/base.api";
-import {FilterUser, UpdatePassword, User} from "@/core/interfaces/user.interface";
-import {PaginationResponse} from "@/core/interfaces/pagination.interface";
-import {util} from "zod";
-import {toast} from "sonner";
+import { FilterUser, UpdatePassword, User, UserLogin, UserToken } from "@/core/interfaces/user.interface";
+
+import { BaseApi } from "@/apis/base.api";
+import { PaginationResponse } from "@/core/interfaces/pagination.interface";
+import { toast } from "sonner";
+import { util } from "zod";
+
 import Omit = util.Omit;
 
 export class UserApi extends BaseApi<User> {
     private readonly updatePasswordSuccessMessage: string = 'Atualização de senha realizada com sucesso';
 
     private readonly updatePasswordFailureMessage: string = 'Houve um erro ao tentar alterar a senha do usuário';
+
+    private readonly LOGIN_URL: string = 'login';
 
     constructor() {
         super();
@@ -41,7 +45,26 @@ export class UserApi extends BaseApi<User> {
                     toast(this.updatePasswordSuccessMessage);
                 })
                 .catch((error) => {
-                    toast(this.updatePasswordFailureMessage, {description: error.message});
+                    toast(this.updatePasswordFailureMessage, { description: error.message });
+                    reject(error);
+                });
+        });
+    }
+
+    // login methods
+    async login(loginObj: UserLogin): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.serverApi
+                .post(`${this.LOGIN_URL}/`, loginObj)
+                .then((response) => {
+                    const result: UserToken = response.data;
+
+                    resolve();
+
+                    // set token in local storage
+                    localStorage.setItem('token', JSON.stringify(result));
+                })
+                .catch((error) => {
                     reject(error);
                 });
         });
