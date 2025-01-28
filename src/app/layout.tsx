@@ -4,9 +4,10 @@ import "./globals.css";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { AppSidebar } from "@/components/common/app-sidebar.component";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import type { Metadata } from "next";
 import { LoginPage } from "./login/login.page";
+import type { Metadata } from "next";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import StoreProvider from "@/redux/storeProvider";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -43,17 +44,19 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
-                <>
-                    {isLoged && <SidebarProvider>
-                        <AppSidebar />
-                        <main className="flex w-full h-screen">
-                            {/*<SidebarProvider/>*/}
-                            <div className="flex-grow h-screen p-3">{children}</div>
-                        </main>
-                    </SidebarProvider>}
+                <StoreProvider>
+                    <>
+                        {isLoged && <SidebarProvider>
+                            <AppSidebar />
+                            <main className="flex w-full h-screen">
+                                {/*<SidebarProvider/>*/}
+                                <div className="flex-grow h-screen p-3">{children}</div>
+                            </main>
+                        </SidebarProvider>}
 
-                    {!isLoged && <LoginPage userLoged={() => { }} />}
-                </>
+                        {!isLoged && <LoginPage userLoged={() => { }} />}
+                    </>
+                </StoreProvider>
             </body>
         </html>
     );
