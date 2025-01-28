@@ -1,11 +1,20 @@
 'use client';
 
+import { Eye, EyeOff } from "lucide-react";
+import { JSX, useState } from "react";
+
+import { UserApi } from "@/apis/user.api";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
 
-export function LoginPage() {
+interface LoginPageProps {
+  userLoged: VoidFunction;
+}
+
+export function LoginPage(props: LoginPageProps) {
+  const userApi = new UserApi();
+
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [continueConnected, setContinueConnected] = useState<boolean>(false);
@@ -15,6 +24,10 @@ export function LoginPage() {
   const [confirmNewPassword, setConfirmNewPassword] = useState<string>('');
 
   const [resetPassword, setResetPassword] = useState<boolean>(false);
+
+  // utils states
+  const [viewFristPassword, setViewFirstPassword] = useState<boolean>(false);
+  const [viewSecondPassword, setViewSecondPassword] = useState<boolean>(false);
 
   const passwordNotMatch = (): boolean => {
     const formatedNewPassword: string = newPassword.replace(/\s+/g, '').trim();
@@ -32,16 +45,27 @@ export function LoginPage() {
     return passwordNotMatch() || !notExists;
   }
 
-  const submitLogin = () => {
+  const submitLogin = async () => {
     const objToLogin = {
       email,
       password
     }
 
-    console.log({ objToLogin });
+    await userApi.login(objToLogin).then(() => props.userLoged());
   };
 
   const submitRecoveryPassword = () => { };
+
+  const toogleResetPassword = () => {
+    setResetPassword(!resetPassword);
+    setViewFirstPassword(false);
+    setViewSecondPassword(false);
+  }
+
+  const objViewPassword: Record<'true' | 'false', JSX.Element> = {
+    true: <Eye />,
+    false: <EyeOff />
+  };
 
   return (
     <div className="flex w-full h-screen">
@@ -119,7 +143,10 @@ export function LoginPage() {
                 </section>
                 <section className="flex flex-col gap-3">
                   <label htmlFor="confirmNewPassword">Confirme sua nova senha</label>
-                  <Input id='confirmNewPassword' type="password" value={confirmNewPassword} onChange={event => setConfirmNewPassword(event.target.value)} />
+                  <div className="flex items-center gap-3">
+                    <Input id='confirmNewPassword' type="password" value={confirmNewPassword} onChange={event => setConfirmNewPassword(event.target.value)} />
+                    <Button>{objViewPassword[String(viewFristPassword) as 'true' | 'false']}</Button>
+                  </div>
                 </section>
               </div>
 
