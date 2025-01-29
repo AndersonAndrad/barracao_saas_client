@@ -1,5 +1,4 @@
-import {Calendar, Home, Inbox, Receipt, Settings} from "lucide-react"
-
+import { Calendar, Home, Inbox, Receipt, Settings } from "lucide-react"
 import {
     Sidebar,
     SidebarContent,
@@ -23,8 +22,13 @@ const items = [
         icon: Inbox,
     },
     {
-        title: "Macumbeirinhos(as)",
+        title: "Usuarios",
         url: "/users",
+        icon: Calendar,
+    },
+    {
+        title: "Mensalidades",
+        url: "/mensalidades",
         icon: Calendar,
     },
     {
@@ -51,7 +55,7 @@ export function AppSidebar() {
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton asChild>
                                         <a href={item.url}>
-                                            <item.icon/>
+                                            <item.icon />
                                             <span>{item.title}</span>
                                         </a>
                                     </SidebarMenuButton>
