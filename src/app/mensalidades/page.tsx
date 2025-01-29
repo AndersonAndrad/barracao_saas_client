@@ -2,8 +2,7 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { RegisterMonthly } from "@/components/monthly/register-monthly.component";
 import { useState } from "react";
 
 export default function Mensalidades() {
@@ -16,10 +15,7 @@ export default function Mensalidades() {
           <h1 className="text-2xl font-bold">Mensalidades</h1>
         </div>
         <div className="w-full flex justify-end">
-          <Button>
-            <Plus />
-            Cadastrar mensalidades
-          </Button>
+          <RegisterMonthly />
         </div>
       </header>
 
@@ -30,6 +26,7 @@ export default function Mensalidades() {
           <div className="flex flex-col justify-center items-center gap-3 h-full">
             <h1 className="text-center font-bold text-sm">Nenhuma mensalidade cadastrada</h1>
             <span className="text-center text-xs">Você ainda não tem nenhuma mensalidade cadastrada, cadastre uma mensalidade</span>
+            <RegisterMonthly />
           </div>
         }
 
