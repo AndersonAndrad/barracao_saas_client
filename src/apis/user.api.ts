@@ -2,10 +2,8 @@ import { FilterUser, UpdatePassword, User, UserLogin, UserToken } from "@/core/i
 
 import { BaseApi } from "@/apis/base.api";
 import { PaginationResponse } from "@/core/interfaces/pagination.interface";
+import { jwtDecode } from "jwt-decode";
 import { toast } from "sonner";
-import { util } from "zod";
-
-import Omit = util.Omit;
 
 export class UserApi extends BaseApi<User> {
     private readonly updatePasswordSuccessMessage: string = 'Atualização de senha realizada com sucesso';
@@ -13,6 +11,8 @@ export class UserApi extends BaseApi<User> {
     private readonly updatePasswordFailureMessage: string = 'Houve um erro ao tentar alterar a senha do usuário';
 
     private readonly LOGIN_URL: string = 'login';
+
+    private readonly HASH_TOKEN: string = `THIS_IS_MY_DEV_TOKEN`;
 
     constructor() {
         super();
@@ -52,14 +52,16 @@ export class UserApi extends BaseApi<User> {
     }
 
     // login methods
-    async login(loginObj: UserLogin): Promise<void> {
+    async login(loginObj: UserLogin): Promise<User> {
         return new Promise((resolve, reject) => {
             this.serverApi
                 .post(`${this.LOGIN_URL}/`, loginObj)
                 .then((response) => {
                     const result: UserToken = response.data;
 
-                    resolve();
+                    const user: User = jwtDecode(result.token);
+
+                    resolve(user);
 
                     // set token in local storage
                     localStorage.setItem('token', JSON.stringify(result));

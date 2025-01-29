@@ -2,18 +2,17 @@
 
 import { Eye, EyeOff } from "lucide-react";
 import { JSX, useState } from "react";
+import { addUser, setIsLogged } from "@/redux/states/user.state";
 
-import { UserApi } from "@/apis/user.api";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { UserApi } from "@/apis/user.api";
+import { useDispatch } from "react-redux";
 
-interface LoginPageProps {
-  userLoged: VoidFunction;
-}
-
-export function LoginPage(props: LoginPageProps) {
+export function LoginPage() {
   const userApi = new UserApi();
+  const dispatch = useDispatch();
 
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -51,7 +50,10 @@ export function LoginPage(props: LoginPageProps) {
       password
     }
 
-    await userApi.login(objToLogin).then(() => props.userLoged());
+    await userApi.login(objToLogin).then((user) => {
+      dispatch(addUser(user));
+      dispatch(setIsLogged(true));
+    });
   };
 
   const submitRecoveryPassword = () => { };
