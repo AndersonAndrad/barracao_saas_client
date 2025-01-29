@@ -10,7 +10,7 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { useState } from "react";
 
-export function OptionsMonthly() {
+export function OptionsMonthlyFee() {
   const [reductionMonthly, setReductionMonthly] = useState<boolean>(false);
   const [updateMonthly, setUpdateMontlhy] = useState<boolean>(false);
   const [detailMonthly, setDetailMonthly] = useState<boolean>(false);

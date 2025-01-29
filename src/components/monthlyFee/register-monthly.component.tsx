@@ -7,7 +7,7 @@ import { DatePicker } from "../ui/date-picker";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 
-export function RegisterMonthly() {
+export function RegisterMonthlyFee() {
   return (
     <Dialog>
       <DialogTrigger asChild>

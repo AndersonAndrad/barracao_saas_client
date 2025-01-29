@@ -2,10 +2,10 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-import { RegisterMonthly } from "@/components/monthly/register-monthly.component";
+import { RegisterMonthlyFee } from "@/components/monthlyFee/register-monthly.component";
 import { useState } from "react";
 
-export default function Mensalidades() {
+export default function MonthlyFee() {
   const [existsData, setExistsData] = useState<boolean>(false);
 
   return (
@@ -15,7 +15,7 @@ export default function Mensalidades() {
           <h1 className="text-2xl font-bold">Mensalidades</h1>
         </div>
         <div className="w-full flex justify-end">
-          <RegisterMonthly />
+          <RegisterMonthlyFee />
         </div>
       </header>
 
@@ -26,7 +26,7 @@ export default function Mensalidades() {
           <div className="flex flex-col justify-center items-center gap-3 h-full">
             <h1 className="text-center font-bold text-sm">Nenhuma mensalidade cadastrada</h1>
             <span className="text-center text-xs">Você ainda não tem nenhuma mensalidade cadastrada, cadastre uma mensalidade</span>
-            <RegisterMonthly />
+            <RegisterMonthlyFee />
           </div>
         }
         {/* when exists data */}
