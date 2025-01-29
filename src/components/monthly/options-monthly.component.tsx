@@ -1,6 +1,7 @@
 import { Check, MoreVertical, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Select, SelectContent, SelectGroup, SelectTrigger, SelectValue } from "../ui/select";
 
 import { Button } from "../ui/button";
 import { DatePicker } from "../ui/date-picker";
@@ -10,6 +11,7 @@ import { useState } from "react";
 
 export function OptionsMonthly() {
   const [reductionMonthly, setReductionMonthly] = useState<boolean>(false);
+  const [updateMonthly, setUpdateMontlhy] = useState<boolean>(false);
 
   return (
     <>
@@ -21,6 +23,9 @@ export function OptionsMonthly() {
           <DropdownMenuGroup>
             <DropdownMenuItem onClick={() => setReductionMonthly(true)} className="cursor-pointer">
               Baixar mensalidade
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setUpdateMontlhy(true)} className="cursor-pointer">
+              Atulizar mensalidade
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
@@ -48,6 +53,72 @@ export function OptionsMonthly() {
             <div className="flex flex-col gap-3">
               <label htmlFor="">Data de pagamento</label>
               <DatePicker onSelect={() => { }} selected={new Date()} />
+            </div>
+
+            {/* Annotation */}
+            <div className="flex flex-col gap-3">
+              <label htmlFor="">Anotações</label>
+              <Textarea className="resize-none" placeholder="Anotações importantes" />
+            </div>
+          </div>
+
+          <DialogFooter className="flex justify-end items-center gap-3">
+            <Button variant='ghost'>Cancelar <X /></Button>
+            <Button>Salvar <Check /></Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* update montlhy */}
+      <Dialog open={updateMonthly} onOpenChange={() => setUpdateMontlhy(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Atualização de mensalidades</DialogTitle>
+            <DialogDescription>Atualização das mensalidades dos usuários</DialogDescription>
+          </DialogHeader>
+
+          {/* content */}
+          <div className="flex flex-col gap-3">
+            {/* Usuário */}
+            <div className="flex flex-col gap-3">
+              <label htmlFor="">Usuário</label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder='Selecionar usuário' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {/* implements options here */}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* monthly value */}
+            <div className="flex flex-col gap-3">
+              <label htmlFor="">Valor da mensalidade</label>
+              <Input placeholder="R$50,00" />
+            </div>
+
+            {/* monthly due */}
+            <div className="flex flex-col gap-3">
+              <label htmlFor="">Data de vencimento</label>
+              <DatePicker onSelect={() => { }} selected={new Date()} />
+            </div>
+
+            {/* date start && finish */}
+            <div className="flex items-center gap-3">
+              {/* start date */}
+              <div className="flex flex-col gap-3 w-full">
+                <label htmlFor="">Data de vencimento</label>
+                <DatePicker onSelect={() => { }} selected={new Date()} />
+              </div>
+
+              {/* finish date */}
+              <div className="flex flex-col gap-3 w-full">
+                <label htmlFor="">Data de vencimento</label>
+                <DatePicker onSelect={() => { }} selected={new Date()} />
+              </div>
             </div>
 
             {/* Annotation */}
