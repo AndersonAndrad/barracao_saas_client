@@ -29,7 +29,6 @@ export default function Mensalidades() {
             <RegisterMonthly />
           </div>
         }
-
         {/* when exists data */}
         {existsData &&
           <Table>

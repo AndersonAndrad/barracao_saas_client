@@ -4,6 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import { Select, SelectContent, SelectGroup, SelectTrigger, SelectValue } from "../ui/select";
 
 import { Button } from "../ui/button";
+import { CopyToClipboard } from "../common/copy-clipboard.component";
 import { DatePicker } from "../ui/date-picker";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
@@ -12,6 +13,7 @@ import { useState } from "react";
 export function OptionsMonthly() {
   const [reductionMonthly, setReductionMonthly] = useState<boolean>(false);
   const [updateMonthly, setUpdateMontlhy] = useState<boolean>(false);
+  const [detailMonthly, setDetailMonthly] = useState<boolean>(false);
 
   return (
     <>
@@ -26,6 +28,9 @@ export function OptionsMonthly() {
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setUpdateMontlhy(true)} className="cursor-pointer">
               Atulizar mensalidade
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setDetailMonthly(true)} className="cursor-pointer">
+              Detalhes da mensalidade
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
@@ -69,7 +74,7 @@ export function OptionsMonthly() {
         </DialogContent>
       </Dialog>
 
-      {/* update montlhy */}
+      {/* update monthly */}
       <Dialog open={updateMonthly} onOpenChange={() => setUpdateMontlhy(false)}>
         <DialogContent>
           <DialogHeader>
@@ -122,6 +127,35 @@ export function OptionsMonthly() {
             </div>
 
             {/* Annotation */}
+            <div className="flex flex-col gap-3">
+              <label htmlFor="">Anotações</label>
+              <Textarea className="resize-none" placeholder="Anotações importantes" />
+            </div>
+          </div>
+
+          <DialogFooter className="flex justify-end items-center gap-3">
+            <Button variant='ghost'>Cancelar <X /></Button>
+            <Button>Salvar <Check /></Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* detail monthly */}
+      <Dialog open={detailMonthly} onOpenChange={() => setDetailMonthly(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Detalhes da mensalidades</DialogTitle>
+            <DialogDescription>Detalhamento da mensalidade dos usuários</DialogDescription>
+          </DialogHeader>
+
+          {/* content */}
+          <div className="flex flex-col gap-3">
+            <span>Usuário: Anderson Andrade</span>
+            <span>Código: 12345213 <CopyToClipboard payload="1234" /></span>
+            <span>Valor da mensalidade:R$150,00</span>
+            <span>Data de vencimento: Anderson Andrade</span>
+            <span>Data de pagamento: Anderson Andrade</span>
+            <span>Baixa efetuada por: Anderson Andrade</span>
             <div className="flex flex-col gap-3">
               <label htmlFor="">Anotações</label>
               <Textarea className="resize-none" placeholder="Anotações importantes" />
