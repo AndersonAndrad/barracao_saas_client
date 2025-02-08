@@ -30,4 +30,6 @@ export interface MonthlyFeePayment
   extends Pick<MonthlyFee, 'code' | 'paymentDate' | 'amountPaid' | 'notes'> { }
 
 export interface CreateMonthlyFee
-  extends Omit<MonthlyFee, '_id' | 'code' | 'user' | 'endDate' | 'startDate' | 'status'> { }
+  extends Omit<MonthlyFee, '_id' | 'code' | 'user' | 'endDate' | 'startDate' | 'status'> {
+  userId: string;
+}
