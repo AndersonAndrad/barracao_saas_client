@@ -5,5 +5,6 @@ export const monthlyFeeCreateForm = z.object({
   amount: z.number(),
   userId: z.string().min(10, {
     message: 'Um usuário deve ser selecionado'
-  })
+  }),
+  notes: z.string(),
 });

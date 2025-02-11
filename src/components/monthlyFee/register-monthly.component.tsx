@@ -1,35 +1,61 @@
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Check, Plus, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { Select, SelectContent, SelectTrigger, SelectValue } from "../ui/select";
 
-import { Button } from "../ui/button";
-import { DatePicker } from "../ui/date-picker";
-import { Input } from "../ui/input";
-import { SelectItem } from "@radix-ui/react-select";
-import { Textarea } from "../ui/textarea";
+import { MonthlyFeeApi } from "@/apis/monthlyFee.api";
 import { UserApi } from "@/apis/user.api";
+import { Calendar } from "@/components/ui/calendar";
+import { User } from "@/core/interfaces/user.interface";
 import { monthlyFeeCreateForm } from "@/core/schemas/monthlyFee.schema";
+import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { SelectItem } from "@radix-ui/react-select";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
 
 export function RegisterMonthlyFee() {
-  const userApi = new UserApi()
+  const userApi = new UserApi();
+  const monthlyFeeApi = new MonthlyFeeApi();
+
+  const [loadUser, setLoadUser] = useState<boolean>(false);
+
+  const [users, setUsers] = useState<User[]>([]);
 
   const form = useForm<z.infer<typeof monthlyFeeCreateForm>>({
     resolver: zodResolver(monthlyFeeCreateForm),
     defaultValues: {
       amount: 0,
       dueDate: new Date(),
-      userId: ''
+      userId: '',
+      notes: ''
     }
   });
 
-  const submit = () => {
+  const retrieveUsers = async (): Promise<void> => {
+    if (loadUser) return;
+
+    setLoadUser(true);
+    userApi.find({ page: 1, size: 50 }).then(({ items }) => { setUsers(items) }).finally(() => { setLoadUser(false) });
+  };
+
+  useEffect(() => { if (!loadUser) { retrieveUsers() } }, [])
+
+  const submit = async () => {
     const value = form.getValues();
 
-    console.log({ value });
+    monthlyFeeApi.create(value).then(() => { console.log('success') });
   }
 
   return (
@@ -50,22 +76,25 @@ export function RegisterMonthlyFee() {
         <Form {...form}>
           <div className="flex flex-col gap-3">
             {/* Usuário */}
-            <div className="flex flex-col gap-3">
-              <label htmlFor="">Usuário</label>
+            <div className="flex flex-col w-[90%] gap-3">
               <FormField
                 control={form.control}
                 name="userId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Valor da mensalidade</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormLabel>Usuário</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder='' />
+                          <SelectValue placeholder='Selecione um usuário' >
+                            {users.find(user => user._id === field.value)?.name || "Selecione um usuário"}
+                          </SelectValue>
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="e"></SelectItem>
+                        {users.map(user => (
+                          <SelectItem className="cursor-pointer hover:bg-slate-200" key={user._id} value={user._id}>{user.name} - ({user.alias})</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormDescription>
@@ -77,8 +106,7 @@ export function RegisterMonthlyFee() {
             </div>
 
             {/* monthly value */}
-            <div className="flex flex-col gap-3">
-              <label htmlFor="">Valor da mensalidade</label>
+            <div className="flex flex-col w-[90%] gap-3">
               <FormField
                 control={form.control}
                 name="amount"
@@ -98,30 +126,64 @@ export function RegisterMonthlyFee() {
             </div>
 
             {/* monthly due */}
-            <div className="flex flex-col gap-3">
-              <label htmlFor="">Data de vencimento</label>
-              <DatePicker onSelect={() => { }} selected={new Date()} />
+            <div className="flex flex-col w-90% gap-3">
+              <FormField
+                control={form.control}
+                name="dueDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Data de vencimento</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn("w-[240px] pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+                          >
+                            {field.value ? (format(field.value, "PPP")) : (<span>Pick a date</span>)}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             {/* date start && finish */}
-            <div className="flex items-center gap-3">
-              {/* start date */}
-              <div className="flex flex-col gap-3 w-full">
-                <label htmlFor="">Data de vencimento</label>
-                <DatePicker onSelect={() => { }} selected={new Date()} />
-              </div>
 
-              {/* finish date */}
-              <div className="flex flex-col gap-3 w-full">
-                <label htmlFor="">Data de vencimento</label>
-                <DatePicker onSelect={() => { }} selected={new Date()} />
-              </div>
-            </div>
 
             {/* Annotation */}
             <div className="flex flex-col gap-3">
-              <label htmlFor="">Anotações</label>
-              <Textarea className="resize-none" placeholder="Anotações importantes" />
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Anotações</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Anotações importantes" className="w-[90%] resize-none" {...field} />
+                    </FormControl>
+                    <FormDescription>
+
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
           </div>
         </Form>
@@ -134,3 +196,82 @@ export function RegisterMonthlyFee() {
     </Dialog>
   )
 }
+
+// @todo - add in the line 146 in the future
+// <div className="flex items-center w-[90%] gap-3">
+// {/* start date */}
+// <div className="flex flex-col gap-3 w-full">
+//   <FormField
+//     control={form.control}
+//     name="dueDate"
+//     render={({ field }) => (
+//       <FormItem className="flex flex-col">
+//         <FormLabel>Data de inicio</FormLabel>
+//         <Popover>
+//           <PopoverTrigger asChild>
+//             <FormControl>
+//               <Button
+//                 variant={"outline"}
+//                 className={cn("w-[240px] pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+//               >
+//                 {field.value ? (format(field.value, "PPP")) : (<span>Pick a date</span>)}
+//                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+//               </Button>
+//             </FormControl>
+//           </PopoverTrigger>
+//           <PopoverContent className="w-auto p-0" align="start">
+//             <Calendar
+//               mode="single"
+//               selected={field.value}
+//               onSelect={field.onChange}
+//               disabled={(date) =>
+//                 date > new Date() || date < new Date("1900-01-01")
+//               }
+//               initialFocus
+//             />
+//           </PopoverContent>
+//         </Popover>
+//         <FormMessage />
+//       </FormItem>
+//     )}
+//   />
+// </div>
+
+// {/* finish date */}
+// <div className="flex flex-col gap-3 w-full">
+//   <FormField
+//     control={form.control}
+//     name="dueDate"
+//     render={({ field }) => (
+//       <FormItem className="flex flex-col">
+//         <FormLabel>Data de finalização</FormLabel>
+//         <Popover>
+//           <PopoverTrigger asChild>
+//             <FormControl>
+//               <Button
+//                 variant={"outline"}
+//                 className={cn("w-[240px] pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+//               >
+//                 {field.value ? (format(field.value, "PPP")) : (<span>Pick a date</span>)}
+//                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+//               </Button>
+//             </FormControl>
+//           </PopoverTrigger>
+//           <PopoverContent className="w-auto p-0" align="start">
+//             <Calendar
+//               mode="single"
+//               selected={field.value}
+//               onSelect={field.onChange}
+//               disabled={(date) =>
+//                 date > new Date() || date < new Date("1900-01-01")
+//               }
+//               initialFocus
+//             />
+//           </PopoverContent>
+//         </Popover>
+//         <FormMessage />
+//       </FormItem>
+//     )}
+//   />
+// </div>
+// </div>
